@@ -20,7 +20,7 @@ export const EnvSchema = z.object({
     .refine((val) => StrKey.isValidEd25519SecretSeed(val), {
       message: 'SERVER_SECRET_KEY must be a valid Stellar secret seed starting with S',
     })
-    .default('SCZANGBA5YHTNYVVV4C3U252E2B6P6IRKDIOINZCAHSKV27QIN2YQZAA'),
+    .default('SCBSOLSZRRLUP23G4ZI6IBDRV5MXTLNESTJWH7XDE7SHHB6KOI4VGZED'),
   JWT_SECRET: z
     .string()
     .min(16, 'JWT_SECRET must be at least 16 characters for cryptographic HMAC strength')
