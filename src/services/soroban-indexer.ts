@@ -3,6 +3,7 @@ import { AgreementStatus, MilestoneStatus } from '@prisma/client';
 import { config } from '../config.js';
 import { SorobanEventDecoder, DecodedEvent } from './event-decoder.js';
 import { agreementRepo } from '../repositories/agreement-repo.js';
+import { webhookDispatcher } from './webhook-dispatcher.js';
 
 export class SorobanIndexerService {
   private server: rpc.Server;
@@ -137,6 +138,15 @@ export class SorobanIndexerService {
         ledger: event.ledger,
         txHash: event.id,
         payload: event.data,
+      });
+
+      // 2. Dispatch to registered webhook subscribers
+      webhookDispatcher.queueEvent(event.type, {
+        agreementId: event.agreementId,
+        ledger: event.ledger,
+        txHash: event.id,
+        timestamp: event.timestamp,
+        ...event.data,
       });
 
       if (!event.agreementId) return;
