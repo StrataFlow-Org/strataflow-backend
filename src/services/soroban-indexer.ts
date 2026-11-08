@@ -136,12 +136,12 @@ export class SorobanIndexerService {
         type: event.type,
         ledger: event.ledger,
         txHash: event.id,
-        payload: event.payload,
+        payload: event.data,
       });
 
       if (!event.agreementId) return;
       const onChainId = BigInt(event.agreementId);
-      const payload = event.payload;
+      const payload = event.data;
 
       switch (event.type) {
         case 'AgreementCreated': {
