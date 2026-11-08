@@ -67,9 +67,16 @@ export const agreementRoutes: FastifyPluginAsync = async (fastify) => {
   // GET /api/stats - platform escrow metrics
   fastify.get('/api/stats', async (_request, reply) => {
     const stats = await agreementRepo.getStats();
+    const disputeRate = stats.totalAgreements > 0
+      ? Number(((stats.disputedAgreements / stats.totalAgreements) * 100).toFixed(2))
+      : 0;
+
     return reply.send({
       success: true,
-      stats,
+      stats: {
+        ...stats,
+        disputeRatePercent: disputeRate,
+      },
     });
   });
 
