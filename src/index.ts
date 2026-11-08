@@ -7,7 +7,9 @@ import { auditHookPlugin } from './plugins/audit.js';
 import { healthRoutes } from './routes/health.js';
 import { agreementRoutes } from './routes/agreements.js';
 import { authRoutes } from './routes/auth.js';
+import { webhookRoutes } from './routes/webhooks.js';
 import { indexerService } from './services/soroban-indexer.js';
+import { webhookDispatcher } from './services/webhook-dispatcher.js';
 import { setupBigIntSerialization } from './services/serializer.js';
 import { disconnectDatabase } from './services/db.js';
 
@@ -51,6 +53,7 @@ async function main() {
   await app.register(healthRoutes);
   await app.register(authRoutes);
   await app.register(agreementRoutes);
+  await app.register(webhookRoutes);
 
   // 4. Background Indexer
   await indexerService.start();
@@ -58,6 +61,7 @@ async function main() {
   const shutdown = async () => {
     console.log('Shutting down gracefully...');
     indexerService.stop();
+    webhookDispatcher.clear();
     await disconnectDatabase();
     await app.close();
     process.exit(0);
