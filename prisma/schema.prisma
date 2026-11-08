@@ -1,0 +1,78 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AgreementStatus {
+  CREATED
+  FUNDED
+  COMPLETED
+  DISPUTED
+  RESOLVED
+  CANCELLED
+}
+
+enum MilestoneStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  DISPUTED
+}
+
+model Agreement {
+  id              String          @id @default(uuid())
+  onChainId       BigInt          @unique
+  clientAddress   String
+  providerAddress String
+  arbiterAddress  String
+  tokenAddress    String
+  totalAmount     String
+  balance         String
+  status          AgreementStatus @default(CREATED)
+  deadline        DateTime
+  title           String?
+  description     String?
+  metadataCid     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  milestones      Milestone[]
+  events          IndexedEvent[]
+
+  @@index([clientAddress])
+  @@index([providerAddress])
+  @@index([status])
+}
+
+model Milestone {
+  id          String          @id @default(uuid())
+  agreementId String
+  agreement   Agreement       @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  index       Int
+  description String
+  amount      String
+  status      MilestoneStatus @default(PENDING)
+  proofHash   String?
+  submittedAt DateTime?
+  approvedAt  DateTime?
+
+  @@unique([agreementId, index])
+}
+
+model IndexedEvent {
+  id          String    @id @default(uuid())
+  agreementId String?
+  agreement   Agreement? @relation(fields: [agreementId], references: [id])
+  type        String
+  ledger      Int
+  txHash      String
+  payload     Json
+  timestamp   DateTime  @default(now())
+
+  @@index([type])
+  @@index([ledger])
+}
