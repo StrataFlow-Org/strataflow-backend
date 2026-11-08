@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { sep10AuthService } from '../src/services/sep10-auth';
+import { sep10Service } from '../src/services/sep10-auth.js';
 import { Keypair } from '@stellar/stellar-sdk';
 
 describe('Role-Based Access Control & Identity Verification Tests', () => {
@@ -9,8 +9,8 @@ describe('Role-Based Access Control & Identity Verification Tests', () => {
   const thirdPartyKeypair = Keypair.random();
 
   it('verifies client token matches agreement client role', () => {
-    const token = sep10AuthService.generateSessionJwt(clientKeypair.publicKey());
-    const verified = sep10AuthService.verifySessionJwt(token);
+    const token = sep10Service.generateToken(clientKeypair.publicKey());
+    const verified = sep10Service.verifyToken(token);
 
     assert.ok(verified);
     assert.strictEqual(verified.sub, clientKeypair.publicKey());
@@ -23,8 +23,8 @@ describe('Role-Based Access Control & Identity Verification Tests', () => {
   });
 
   it('rejects authorization when non-participant attempts privileged action', () => {
-    const intruderToken = sep10AuthService.generateSessionJwt(thirdPartyKeypair.publicKey());
-    const verified = sep10AuthService.verifySessionJwt(intruderToken);
+    const intruderToken = sep10Service.generateToken(thirdPartyKeypair.publicKey());
+    const verified = sep10Service.verifyToken(intruderToken);
 
     assert.ok(verified);
     const caller = verified.sub;

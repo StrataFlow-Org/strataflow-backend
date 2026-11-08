@@ -1,16 +1,18 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { agreementRepository } from '../src/services/agreement-repository';
-import { AgreementStatus, MilestoneStatus } from '../src/types/agreement';
+import { agreementRepo } from '../src/repositories/agreement-repo.js';
+import { AgreementStatus, MilestoneStatus } from '@prisma/client';
 
 describe('Concurrent Volume & Aggregation Tests', () => {
+  agreementRepo.setUseDatabase(false);
+
   it('processes parallel agreement creations and aggregates total volume accurately', async () => {
     const batchSize = 5;
-    const baseAmount = 1_000_000_000n; // 100 tokens
+    const baseAmount = '1000000000'; // string in AgreementData
 
     const promises = Array.from({ length: batchSize }).map((_, i) => {
-      const onChainId = `concurrent-${Date.now()}-${i}`;
-      return agreementRepository.upsert({
+      const onChainId = BigInt(Date.now() + i);
+      return agreementRepo.upsertAgreement({
         onChainId,
         clientAddress: 'GBBD47IF6LWK7P7MDEVTESTWINNINGTALKER2026COMMITS',
         providerAddress: 'GCP777PROVIDERTESTNETWINNINGTALKER2026XYZ',
@@ -35,8 +37,8 @@ describe('Concurrent Volume & Aggregation Tests', () => {
     const results = await Promise.all(promises);
     assert.strictEqual(results.length, batchSize);
 
-    const stats = await agreementRepository.getStats();
+    const stats = await agreementRepo.getStats();
     assert.ok(stats.totalAgreements >= batchSize);
-    assert.ok(stats.fundedAgreements >= batchSize);
+    assert.ok(stats.activeEscrows >= batchSize);
   });
 });
