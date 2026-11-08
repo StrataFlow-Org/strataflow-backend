@@ -12,6 +12,7 @@ import { disconnectDatabase } from './services/db.js';
 setupBigIntSerialization();
 
 const app = Fastify({
+  bodyLimit: 1048576, // 1MB payload limit to prevent buffer exhaustion DOS
   logger: {
     level: config.NODE_ENV === 'development' ? 'info' : 'warn',
   },
