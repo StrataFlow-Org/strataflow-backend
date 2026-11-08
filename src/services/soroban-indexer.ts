@@ -145,23 +145,12 @@ export class SorobanIndexerService {
 
       switch (event.type) {
         case 'AgreementCreated': {
-          await agreementRepo.upsertAgreement({
-            onChainId,
-            clientAddress: payload.client || '',
-            providerAddress: payload.provider || '',
-            arbiterAddress: payload.arbiter || '',
-            tokenAddress: payload.token || '',
-            totalAmount: (payload.total_amount ?? payload.amount ?? '0').toString(),
-            balance: '0',
-            status: AgreementStatus.CREATED,
-            deadline: payload.deadline ? new Date(Number(payload.deadline) * 1000) : new Date(Date.now() + 86400000 * 30),
-          });
+          await this.handleAgreementCreated(onChainId, payload);
           break;
         }
 
         case 'AgreementFunded': {
-          const fundedAmount = (payload.amount ?? '0').toString();
-          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.FUNDED, fundedAmount);
+          await this.handleAgreementFunded(onChainId, payload);
           break;
         }
 
@@ -214,6 +203,44 @@ export class SorobanIndexerService {
     } catch (err) {
       console.error(`[SorobanIndexer] Error processing event ${event.id}:`, err);
     }
+  }
+
+  private async handleAgreementCreated(onChainId: bigint, payload: any): Promise<void> {
+    const client = payload.client || '';
+    const provider = payload.provider || '';
+    const arbiter = payload.arbiter || '';
+    const token = payload.token || '';
+    const totalAmount = (payload.total_amount ?? payload.amount ?? '0').toString();
+    const deadline = payload.deadline
+      ? new Date(Number(payload.deadline) * 1000)
+      : new Date(Date.now() + 86400000 * 30);
+
+    const milestones = Array.isArray(payload.milestones)
+      ? payload.milestones.map((m: any, idx: number) => ({
+          index: idx,
+          description: m.description || `Milestone #${idx + 1}`,
+          amount: (m.amount ?? '0').toString(),
+          status: MilestoneStatus.PENDING,
+        }))
+      : undefined;
+
+    await agreementRepo.upsertAgreement({
+      onChainId,
+      clientAddress: client,
+      providerAddress: provider,
+      arbiterAddress: arbiter,
+      tokenAddress: token,
+      totalAmount,
+      balance: '0',
+      status: AgreementStatus.CREATED,
+      deadline,
+      milestones,
+    });
+  }
+
+  private async handleAgreementFunded(onChainId: bigint, payload: any): Promise<void> {
+    const fundedAmount = (payload.amount ?? '0').toString();
+    await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.FUNDED, fundedAmount);
   }
 
   public getEvents(agreementId?: string, type?: string, limit: number = 50): DecodedEvent[] {
