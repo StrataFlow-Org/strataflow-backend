@@ -1,6 +1,9 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { config } from './config.js';
+import { securityPlugin } from './plugins/security.js';
+import { errorHandlerPlugin } from './plugins/error-handler.js';
+import { auditHookPlugin } from './plugins/audit.js';
 import { healthRoutes } from './routes/health.js';
 import { agreementRoutes } from './routes/agreements.js';
 import { authRoutes } from './routes/auth.js';
@@ -19,14 +22,29 @@ const app = Fastify({
 });
 
 async function main() {
+  // 1. Security & Header protection
+  await app.register(securityPlugin);
+  await app.register(errorHandlerPlugin);
+  await app.register(auditHookPlugin);
+
+  // 2. Strict CORS with origin verification
+  const allowedOrigins = config.CORS_ORIGIN.split(',').map((o) => o.trim());
   await app.register(cors, {
-    origin: config.CORS_ORIGIN,
+    origin: (origin, cb) => {
+      if (!origin || config.CORS_ORIGIN === '*' || allowedOrigins.includes(origin)) {
+        return cb(null, true);
+      }
+      return cb(new Error(`Origin ${origin} not allowed by StrataFlow CORS policy`), false);
+    },
+    credentials: true,
   });
 
+  // 3. Application Routes
   await app.register(healthRoutes);
   await app.register(authRoutes);
   await app.register(agreementRoutes);
 
+  // 4. Background Indexer
   await indexerService.start();
 
   const shutdown = async () => {
