@@ -3,52 +3,85 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Fastify](https://img.shields.io/badge/Fastify-v4.26-black.svg)](https://fastify.io/)
 [![Stellar SDK](https://img.shields.io/badge/Stellar%20SDK-v12+-blueviolet.svg)](https://stellar.org)
+[![Prisma](https://img.shields.io/badge/Prisma-v5.22-2D3748.svg)](https://prisma.io)
 
 > **Part of the [StrataFlow Protocol](https://github.com/StrataFlow-Org) suite.**  
-> Off-chain event ingestion engine, SEP-10 wallet authentication, and metadata API.
+> Off-chain event ingestion engine, SEP-10 WebAuth, HMAC webhook dispatcher, and telemetry API. Built for Stellar Drips Wave.
 
 ---
 
 ## 🌟 Overview
 
 `strataflow-backend` powers the off-chain infrastructure for the StrataFlow protocol on Stellar:
-- **Soroban Event Indexer**: Ingests and normalizes smart contract events (`create`, `fund`, `submit`, `release`, `dispute`, `resolve`) via the Soroban RPC endpoint.
-- **SEP-10 Authentication**: Implements Stellar Web Authentication challenges to issue JWTs to verified Stellar wallets.
-- **Off-chain Metadata Storage**: Manages milestone descriptions, deliverable attachments, and IPFS hash associations.
-
----
-
-## 🚀 Quick Start
-
-### 1. Install Dependencies
-```bash
-npm install
-```
-
-### 2. Configure Environment
-Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-
-### 3. Run Development Server
-```bash
-npm run dev
-```
+- **Soroban Event Indexer**: Continuously polls Soroban RPC for protocol contract events, parses ScVal topics, and persists state transitions with exponential backoff and cursor pagination.
+- **Cryptographic SEP-10 WebAuth**: Issues cryptographically signed Stellar challenge transactions, verifies Ed25519 wallet signatures, and issues tamper-proof JWT sessions.
+- **HMAC-SHA256 Webhook Dispatcher**: Delivers real-time webhook notifications to external integrations with exponential retries and dead-letter queue resilience.
+- **Resilient Dual Storage Architecture**: Operates against PostgreSQL via Prisma ORM 5.22 with seamless in-memory fallback when database is offline.
+- **Hardened Security Layer**: Fastify Helmet (CSP, HSTS, X-Frame-Options), granular rate limiting (100/min general, 10/min auth), recursive secret redaction in audit logs, and XSS sanitization.
 
 ---
 
 ## 🔌 API Endpoints
 
+### Protocol & Health Telemetry
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/health` | Health check and network configuration status. |
-| `GET` | `/api/events` | Retrieves indexed Soroban events (optionally filtered by `agreementId`). |
-| `POST`| `/api/metadata` | Submits off-chain milestone scope descriptions and returns IPFS hash. |
+| `GET` | `/health` | Health check, RPC connectivity, database latency & indexer status. |
+| `GET` | `/api/stats` | Protocol analytics: total volume, active escrows, completed milestones. |
+| `GET` | `/api/contract/info` | On-chain contract version, network passphrase, and token contracts. |
+| `GET` | `/api/contract/fees` | Protocol fee basis points and recipient address. |
+| `GET` | `/api/contract/ttl/:id`| Soroban persistent storage TTL threshold and renewal evaluation. |
+
+### Cryptographic SEP-10 Authentication
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/auth/challenge` | Generates a time-bounded cryptographically signed SEP-10 challenge XDR. |
+| `POST` | `/api/auth/token` | Validates client Ed25519 signature and returns authenticated JWT. |
+| `GET` | `/api/auth/me` | Returns current authenticated wallet address. |
+
+### Agreement Directory & Console
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/agreements` | Paginated directory of agreements with role and status filtering. |
+| `GET` | `/api/agreements/:id` | Full agreement details, milestone proofs, and on-chain event history. |
+| `POST` | `/api/metadata` | Submits off-chain milestone descriptions and stores metadata. |
+
+### Real-time Webhooks
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/webhooks/subscribe`| Subscribes webhook endpoint with HMAC secret key. |
+| `GET` | `/api/webhooks` | Lists active webhook subscriptions for caller. |
+| `DELETE`| `/api/webhooks/:id` | Unregisters webhook subscription. |
+| `POST` | `/api/webhooks/test` | Dispatches test payload to verify HMAC signature receipt. |
+
+---
+
+## 🧪 Local Testing & Verification
+
+Execute the comprehensive test suite (98 unit and integration tests):
+
+```bash
+npm test
+```
+
+Execute TypeScript compilation check:
+
+```bash
+npm run build
+```
+
+---
+
+## 🐳 Docker Deployment
+
+Run PostgreSQL 16 and backend API in orchestrated containers:
+
+```bash
+docker-compose up -d
+```
 
 ---
 
 ## 📄 License
 
 This repository is licensed under the [MIT License](LICENSE).
-
