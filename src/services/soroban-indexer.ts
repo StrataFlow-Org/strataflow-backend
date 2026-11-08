@@ -165,22 +165,22 @@ export class SorobanIndexerService {
         }
 
         case 'DisputeRaised': {
-          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.DISPUTED);
+          await this.handleDisputeRaised(onChainId);
           break;
         }
 
         case 'DisputeResolved': {
-          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.RESOLVED, '0');
+          await this.handleDisputeResolved(onChainId);
           break;
         }
 
         case 'AgreementCancelled': {
-          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
+          await this.handleAgreementCancelled(onChainId);
           break;
         }
 
         case 'TimeoutRefund': {
-          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.RESOLVED, '0');
+          await this.handleTimeoutRefund(onChainId);
           break;
         }
       }
@@ -251,6 +251,22 @@ export class SorobanIndexerService {
       const newStatus = rem === '0' ? AgreementStatus.COMPLETED : AgreementStatus.FUNDED;
       await agreementRepo.updateAgreementStatus(onChainId, newStatus, rem);
     }
+  }
+
+  private async handleDisputeRaised(onChainId: bigint): Promise<void> {
+    await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.DISPUTED);
+  }
+
+  private async handleDisputeResolved(onChainId: bigint): Promise<void> {
+    await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.RESOLVED, '0');
+  }
+
+  private async handleAgreementCancelled(onChainId: bigint): Promise<void> {
+    await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
+  }
+
+  private async handleTimeoutRefund(onChainId: bigint): Promise<void> {
+    await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.RESOLVED, '0');
   }
 
   public getEvents(agreementId?: string, type?: string, limit: number = 50): DecodedEvent[] {
