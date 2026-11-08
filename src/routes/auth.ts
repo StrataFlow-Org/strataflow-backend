@@ -4,7 +4,17 @@ import { StrKey } from '@stellar/stellar-sdk';
 import { sep10Service } from '../services/sep10-auth.js';
 
 export const authRoutes: FastifyPluginAsync = async (fastify) => {
-  fastify.post('/api/auth/challenge', async (request, reply) => {
+  fastify.post(
+    '/api/auth/challenge',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+        },
+      },
+    },
+    async (request, reply) => {
     const schema = z.object({
       publicKey: z.string().refine((val) => StrKey.isValidEd25519PublicKey(val), {
         message: 'Invalid Stellar Ed25519 public key format',
@@ -33,7 +43,17 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
-  fastify.post('/api/auth/token', async (request, reply) => {
+  fastify.post(
+    '/api/auth/token',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+        },
+      },
+    },
+    async (request, reply) => {
     const schema = z.object({
       publicKey: z.string().refine((val) => StrKey.isValidEd25519PublicKey(val), {
         message: 'Invalid Stellar Ed25519 public key format',
