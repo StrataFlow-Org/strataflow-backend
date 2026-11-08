@@ -1,56 +1,48 @@
 version: '3.8'
 
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: strataflow_api
-    restart: unless-stopped
-    ports:
-      - "4000:4000"
-    environment:
-      - NODE_ENV=production
-      - PORT=4000
-      - HOST=0.0.0.0
-      - DATABASE_URL=postgresql://strataflow:strataflow_secret@postgres:5432/strataflow_db?schema=public
-      - REDIS_URL=redis://redis:6379
-      - SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
   postgres:
     image: postgres:16-alpine
-    container_name: strataflow_postgres
-    restart: unless-stopped
+    container_name: strataflow-postgres
+    restart: always
     environment:
-      POSTGRES_USER: strataflow
-      POSTGRES_PASSWORD: strataflow_secret
+      POSTGRES_USER: strataflow_user
+      POSTGRES_PASSWORD: strataflow_secure_password_2026
       POSTGRES_DB: strataflow_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U strataflow -d strataflow_db"]
-      interval: 5s
+      test: ['CMD-SHELL', 'pg_isready -U strataflow_user -d strataflow_db']
+      interval: 10s
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    container_name: strataflow_redis
-    restart: unless-stopped
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: strataflow-backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOST: 0.0.0.0
+      CORS_ORIGIN: '*'
+      DATABASE_URL: postgresql://strataflow_user:strataflow_secure_password_2026@postgres:5432/strataflow_db?schema=public
+      STELLAR_NETWORK: TESTNET
+      SOROBAN_RPC_URL: https://soroban-testnet.stellar.org
+      HORIZON_URL: https://horizon-testnet.stellar.org
+      STRATAFLOW_CONTRACT_ID: CDLZ73VU7Y4Z45ETK26QU62NDXQJ2277NY2Y57C2ZFU7SS7M6HWT7G4H
+      SERVER_SECRET_KEY: SCZANGBA5YHTNYVVV4C3U252E2B6P6IRKDIOINZCAHSKV27QIN2YQZAA
+      JWT_SECRET: strataflow-production-jwt-super-secret-key-32chars!
     ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - '3001:3001'
 
 volumes:
   pgdata:
+    driver: local
