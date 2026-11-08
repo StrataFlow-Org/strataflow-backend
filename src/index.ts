@@ -18,6 +18,14 @@ const app = Fastify({
   bodyLimit: 1048576, // 1MB payload limit to prevent buffer exhaustion DOS
   logger: {
     level: config.NODE_ENV === 'development' ? 'info' : 'warn',
+    redact: [
+      'req.headers.authorization',
+      'req.headers.cookie',
+      'req.body.token',
+      'req.body.jwt',
+      'req.body.signedXdr',
+      'req.body.secret',
+    ],
   },
 });
 
