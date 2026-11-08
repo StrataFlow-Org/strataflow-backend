@@ -19,7 +19,7 @@ describe('ProtocolAddressRegistry Unit Tests', () => {
   });
 
   it('validates genuine StrKey contract identifiers', () => {
-    const validContract = 'CDLZ73VU7Y4Z45ETK26QU62NDXQJ2277NY2Y57C2ZFU7SS7M6HWT7G4H';
+    const validContract = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4';
     assert.strictEqual(ProtocolAddressRegistry.isValidContractAddress(validContract), true);
 
     const invalidAddress = 'GBBD47IF6LWK7P7MDEVTESTWINNINGTALKER2026COMMITS'; // account, not contract
