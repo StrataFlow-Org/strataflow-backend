@@ -44,9 +44,20 @@ export const agreementRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.status(404).send({ error: 'Agreement not found' });
       }
 
+      const totalMilestones = agreement.milestones?.length || 0;
+      const approvedMilestones = agreement.milestones?.filter((m) => m.status === 'APPROVED').length || 0;
+      const progressPercent = totalMilestones > 0 ? Math.round((approvedMilestones / totalMilestones) * 100) : 0;
+
       return reply.send({
         success: true,
-        data: agreement,
+        data: {
+          ...agreement,
+          progress: {
+            totalMilestones,
+            approvedMilestones,
+            progressPercent,
+          },
+        },
       });
     } catch {
       return reply.status(400).send({ error: 'Invalid agreement ID format' });
