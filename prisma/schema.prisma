@@ -76,3 +76,4 @@ model IndexedEvent {
   @@index([type])
   @@index([ledger])
 }
+
