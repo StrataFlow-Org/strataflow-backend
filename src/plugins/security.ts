@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
+import fp from 'fastify-plugin';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
@@ -8,9 +9,10 @@ export interface SecurityPluginOptions {
   enableRateLimit?: boolean;
 }
 
-export const securityPlugin: FastifyPluginAsync<SecurityPluginOptions> = async (fastify: FastifyInstance, opts) => {
+const plugin: FastifyPluginAsync<SecurityPluginOptions> = async (fastify: FastifyInstance, opts) => {
   // 1. HTTP Security Headers with Helmet
   await fastify.register(helmet, {
+    global: true,
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -45,6 +47,7 @@ export const securityPlugin: FastifyPluginAsync<SecurityPluginOptions> = async (
   // 3. Global Rate Limiter (100 req/min default)
   if (opts.enableRateLimit !== false) {
     await fastify.register(rateLimit, {
+      global: true,
       max: 100,
       timeWindow: '1 minute',
       allowList: ['127.0.0.1'],
@@ -64,3 +67,7 @@ export const securityPlugin: FastifyPluginAsync<SecurityPluginOptions> = async (
     reply.header('x-request-id', reqId);
   });
 };
+
+export const securityPlugin = fp(plugin, {
+  name: 'strataflow-security',
+});

@@ -1,7 +1,8 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
+import fp from 'fastify-plugin';
 import { auditLogger } from '../services/audit-logger.js';
 
-export const auditHookPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+const audit: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.addHook('onResponse', async (request, reply) => {
     // Audit log mutating requests or failed requests
     const isMutation = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method);
@@ -26,3 +27,7 @@ export const auditHookPlugin: FastifyPluginAsync = async (fastify: FastifyInstan
     }
   });
 };
+
+export const auditHookPlugin = fp(audit, {
+  name: 'strataflow-audit-hook',
+});

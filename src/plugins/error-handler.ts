@@ -1,8 +1,9 @@
 import { FastifyError, FastifyInstance, FastifyPluginAsync } from 'fastify';
+import fp from 'fastify-plugin';
 import { ZodError } from 'zod';
 import { config } from '../config.js';
 
-export const errorHandlerPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+const handler: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.setErrorHandler((error: FastifyError, request, reply) => {
     const requestId = request.id || 'unknown';
 
@@ -73,3 +74,7 @@ export const errorHandlerPlugin: FastifyPluginAsync = async (fastify: FastifyIns
     });
   });
 };
+
+export const errorHandlerPlugin = fp(handler, {
+  name: 'strataflow-error-handler',
+});
