@@ -8,6 +8,7 @@ import { healthRoutes } from './routes/health.js';
 import { agreementRoutes } from './routes/agreements.js';
 import { authRoutes } from './routes/auth.js';
 import { webhookRoutes } from './routes/webhooks.js';
+import { contractRoutes } from './routes/contract.js';
 import { indexerService } from './services/soroban-indexer.js';
 import { webhookDispatcher } from './services/webhook-dispatcher.js';
 import { setupBigIntSerialization } from './services/serializer.js';
@@ -54,6 +55,7 @@ async function main() {
   await app.register(authRoutes);
   await app.register(agreementRoutes);
   await app.register(webhookRoutes);
+  await app.register(contractRoutes);
 
   // 4. Background Indexer
   await indexerService.start();
