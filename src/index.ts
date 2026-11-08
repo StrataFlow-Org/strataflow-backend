@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import { config } from './config.js';
 import { healthRoutes } from './routes/health.js';
 import { agreementRoutes } from './routes/agreements.js';
+import { authRoutes } from './routes/auth.js';
 import { indexerService } from './services/soroban-indexer.js';
 
 const app = Fastify({
@@ -17,6 +18,7 @@ async function main() {
   });
 
   await app.register(healthRoutes);
+  await app.register(authRoutes);
   await app.register(agreementRoutes);
 
   await indexerService.start();
@@ -31,4 +33,3 @@ async function main() {
 }
 
 main();
-
