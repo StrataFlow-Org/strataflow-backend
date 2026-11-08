@@ -1,6 +1,8 @@
 import { rpc } from '@stellar/stellar-sdk';
+import { AgreementStatus, MilestoneStatus } from '@prisma/client';
 import { config } from '../config.js';
 import { SorobanEventDecoder, DecodedEvent } from './event-decoder.js';
+import { agreementRepo } from '../repositories/agreement-repo.js';
 
 export class SorobanIndexerService {
   private server: rpc.Server;
@@ -90,6 +92,7 @@ export class SorobanIndexerService {
 
           this.processedEventIds.add(raw.id);
           this.recordEvent(decoded);
+          await this.processDecodedEvent(decoded);
           newEvents.push(decoded);
 
           if (raw.ledger > this.lastLedger) {
@@ -100,7 +103,7 @@ export class SorobanIndexerService {
 
       this.consecutiveErrors = 0;
       return newEvents;
-    } catch (err: unknown) {
+    } catch {
       this.consecutiveErrors++;
       return [];
     }
@@ -122,6 +125,94 @@ export class SorobanIndexerService {
     this.memoryEvents.unshift(event);
     if (this.memoryEvents.length > 1000) {
       this.memoryEvents.pop();
+    }
+  }
+
+  public async processDecodedEvent(event: DecodedEvent): Promise<void> {
+    try {
+      // 1. Record in repository event log
+      await agreementRepo.recordEventLog({
+        agreementId: event.agreementId,
+        type: event.type,
+        ledger: event.ledger,
+        txHash: event.id,
+        payload: event.payload,
+      });
+
+      if (!event.agreementId) return;
+      const onChainId = BigInt(event.agreementId);
+      const payload = event.payload;
+
+      switch (event.type) {
+        case 'AgreementCreated': {
+          await agreementRepo.upsertAgreement({
+            onChainId,
+            clientAddress: payload.client || '',
+            providerAddress: payload.provider || '',
+            arbiterAddress: payload.arbiter || '',
+            tokenAddress: payload.token || '',
+            totalAmount: (payload.total_amount ?? payload.amount ?? '0').toString(),
+            balance: '0',
+            status: AgreementStatus.CREATED,
+            deadline: payload.deadline ? new Date(Number(payload.deadline) * 1000) : new Date(Date.now() + 86400000 * 30),
+          });
+          break;
+        }
+
+        case 'AgreementFunded': {
+          const fundedAmount = (payload.amount ?? '0').toString();
+          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.FUNDED, fundedAmount);
+          break;
+        }
+
+        case 'MilestoneSubmitted': {
+          const milestoneIndex = typeof payload.milestone_index === 'number' ? payload.milestone_index : 0;
+          await agreementRepo.updateMilestoneStatus(
+            onChainId,
+            milestoneIndex,
+            MilestoneStatus.SUBMITTED,
+            payload.proof_hash?.toString()
+          );
+          break;
+        }
+
+        case 'MilestoneApproved': {
+          const milestoneIndex = typeof payload.milestone_index === 'number' ? payload.milestone_index : 0;
+          await agreementRepo.updateMilestoneStatus(
+            onChainId,
+            milestoneIndex,
+            MilestoneStatus.APPROVED
+          );
+          if (payload.remaining_balance !== undefined) {
+            const rem = payload.remaining_balance.toString();
+            const newStatus = rem === '0' ? AgreementStatus.COMPLETED : AgreementStatus.FUNDED;
+            await agreementRepo.updateAgreementStatus(onChainId, newStatus, rem);
+          }
+          break;
+        }
+
+        case 'DisputeRaised': {
+          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.DISPUTED);
+          break;
+        }
+
+        case 'DisputeResolved': {
+          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.RESOLVED, '0');
+          break;
+        }
+
+        case 'AgreementCancelled': {
+          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
+          break;
+        }
+
+        case 'TimeoutRefund': {
+          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.RESOLVED, '0');
+          break;
+        }
+      }
+    } catch (err) {
+      console.error(`[SorobanIndexer] Error processing event ${event.id}:`, err);
     }
   }
 
