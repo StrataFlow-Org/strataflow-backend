@@ -44,3 +44,4 @@ export class SorobanIndexerService {
 }
 
 export const indexerService = new SorobanIndexerService();
+

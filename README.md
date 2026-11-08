@@ -4,7 +4,7 @@
 [![Fastify](https://img.shields.io/badge/Fastify-v4.26-black.svg)](https://fastify.io/)
 [![Stellar SDK](https://img.shields.io/badge/Stellar%20SDK-v12+-blueviolet.svg)](https://stellar.org)
 
-> **Part of the [StrataFlow Protocol](https://github.com/winningtalker-commits) suite.**  
+> **Part of the [StrataFlow Protocol](https://github.com/StrataFlow-Org) suite.**  
 > Off-chain event ingestion engine, SEP-10 wallet authentication, and metadata API.
 
 ---
@@ -51,3 +51,4 @@ npm run dev
 ## 📄 License
 
 This repository is licensed under the [MIT License](LICENSE).
+

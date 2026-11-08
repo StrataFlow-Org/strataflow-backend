@@ -31,3 +31,4 @@ export const agreementRoutes: FastifyPluginAsync = async (fastify) => {
     };
   });
 };
+
