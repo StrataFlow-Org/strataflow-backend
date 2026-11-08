@@ -56,6 +56,18 @@
 
 ---
 
+## 🚀 Connected Stellar Testnet Deployment
+
+| Parameter | Value |
+|---|---|
+| **Contract ID** | `CDXVD3AA43SE2D52ZBJSH3RDKAPOYG6OCDAZGSQD6M5TCBQIG3HTLY6J` |
+| **Network** | Stellar Testnet (`https://soroban-testnet.stellar.org`) |
+| **Passphrase** | `Test SDF Network ; September 2015` |
+| **Protocol Admin** | `GBWFZHBYEKF5MR2MHW7JAZX6ZRI2PKKBL6IALEMJSBMU4JMDSIB34KP5` |
+| **StellarExpert** | [View Contract](https://stellar.expert/explorer/testnet/contract/CDXVD3AA43SE2D52ZBJSH3RDKAPOYG6OCDAZGSQD6M5TCBQIG3HTLY6J) |
+
+---
+
 ## 🧪 Local Testing & Verification
 
 Execute the comprehensive test suite (98 unit and integration tests):

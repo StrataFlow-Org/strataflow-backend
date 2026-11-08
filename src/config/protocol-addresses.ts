@@ -16,7 +16,7 @@ export const PROTOCOL_NETWORKS: Record<string, NetworkProtocolConfig> = {
     networkPassphrase: 'Test SDF Network ; September 2015',
     contractId:
       process.env.STRATAFLOW_CONTRACT_ID ||
-      'CDLZ73VU7Y4Z45ETK26QU62NDXQJ2277NY2Y57C2ZFU7SS7M6HWT7G4H',
+      'CDXVD3AA43SE2D52ZBJSH3RDKAPOYG6OCDAZGSQD6M5TCBQIG3HTLY6J',
     nativeTokenContract:
       process.env.NATIVE_TOKEN_CONTRACT ||
       'CDLZ73VU7Y4Z45ETK26QU62NDXQJ2277NY2Y57C2ZFU7SS7M6HWT7G4H',
@@ -28,7 +28,7 @@ export const PROTOCOL_NETWORKS: Record<string, NetworkProtocolConfig> = {
     network: 'FUTURENET',
     rpcUrl: 'https://rpc-futurenet.stellar.org',
     networkPassphrase: 'Test SDF Future Network ; October 2022',
-    contractId: process.env.STRATAFLOW_CONTRACT_ID || 'CDLZ73VU7Y4Z45ETK26QU62NDXQJ2277NY2Y57C2ZFU7SS7M6HWT7G4H',
+    contractId: process.env.STRATAFLOW_CONTRACT_ID || 'CDXVD3AA43SE2D52ZBJSH3RDKAPOYG6OCDAZGSQD6M5TCBQIG3HTLY6J',
     nativeTokenContract: 'CDLZ73VU7Y4Z45ETK26QU62NDXQJ2277NY2Y57C2ZFU7SS7M6HWT7G4H',
     usdcTokenContract: '',
   },
