@@ -137,7 +137,11 @@ export class Sep10AuthService {
         .update(`${header}.${payload}`)
         .digest('base64url');
 
-      if (signature !== expectedSignature) return null;
+      const sigBuf = Buffer.from(signature, 'base64url');
+      const expectedBuf = Buffer.from(expectedSignature, 'base64url');
+      if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
+        return null;
+      }
 
       const claims: TokenClaims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf-8'));
       const now = Math.floor(Date.now() / 1000);
