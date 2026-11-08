@@ -51,3 +51,4 @@ describe('ContractDataKeyHelper Serialization Tests', () => {
     assert.deepStrictEqual(ContractDataKeyHelper.fromScVal(ContractDataKeyHelper.toScVal(pauseKey)), pauseKey);
   });
 });
+

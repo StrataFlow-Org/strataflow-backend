@@ -92,3 +92,4 @@ export type ProtocolEventPayload =
   | DisputeResolvedEvent
   | TimeoutRefundClaimedEvent
   | AgreementCancelledEvent;
+

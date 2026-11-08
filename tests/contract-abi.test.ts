@@ -48,3 +48,4 @@ describe('Contract ABI Signature & Type Verification Tests', () => {
     assert.strictEqual(feeAmount + providerPayout, milestoneAmount);
   });
 });
+

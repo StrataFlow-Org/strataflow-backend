@@ -72,3 +72,4 @@ test('Platform Statistics Aggregation Tests', async (t) => {
     assert.strictEqual(stats.totalMilestones, 4);
   });
 });
+

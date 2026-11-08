@@ -18,3 +18,4 @@ test('IpFilterService Security Tests', async () => {
   ipFilter.unblockIp(abusiveIp);
   assert.strictEqual(ipFilter.isIpBlocked(abusiveIp), false);
 });
+

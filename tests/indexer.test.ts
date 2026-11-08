@@ -53,3 +53,4 @@ test('Indexer: records and filters events by agreementId and type', () => {
   const createEvents = indexerService.getEvents(undefined, 'create');
   assert.ok(createEvents.length >= 2);
 });
+

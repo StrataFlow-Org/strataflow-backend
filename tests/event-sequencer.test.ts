@@ -46,3 +46,4 @@ describe('Event Sequencer & Deduplication Unit Tests', () => {
     assert.strictEqual(sorted[2].ledger, 105);
   });
 });
+

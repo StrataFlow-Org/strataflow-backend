@@ -56,3 +56,4 @@ describe('Protocol Event Schema & Discriminator Tests', () => {
     assert.strictEqual(event.clientAmount + event.providerAmount, 50_000_000_000n);
   });
 });
+

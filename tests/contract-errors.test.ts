@@ -45,3 +45,4 @@ describe('Soroban Error Code Translation & Handling Tests', () => {
     assert.strictEqual(parsed.message, 'Network connection timeout');
   });
 });
+

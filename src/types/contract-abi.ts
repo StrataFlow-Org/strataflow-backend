@@ -57,3 +57,4 @@ export interface StrataFlowContractAbi {
   claim_timeout_refund(client: string, agreementId: bigint): Promise<void>;
   cancel_agreement(caller: string, agreementId: bigint): Promise<void>;
 }
+

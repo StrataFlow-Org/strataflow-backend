@@ -63,3 +63,4 @@ describe('Contract HTTP Routes Integration Tests', () => {
     assert.ok(body.data.remainingDays > 0);
   });
 });
+

@@ -24,3 +24,4 @@ export interface WebhookDeliveryAttempt {
   error?: string;
   createdAt: Date;
 }
+

@@ -38,3 +38,4 @@ export class TtlMonitorService {
     return Number((ledgers / 17_280).toFixed(2));
   }
 }
+

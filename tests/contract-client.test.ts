@@ -33,3 +33,4 @@ describe('ContractClientService Unit Tests', () => {
     assert.strictEqual(typeof isPaused, 'boolean');
   });
 });
+

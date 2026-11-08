@@ -40,3 +40,4 @@ test('AuditLoggerService Credential Redaction Tests', async () => {
   const logs = auditLogger.getRecentLogs(10, 'GC_ACTOR_1');
   assert.strictEqual(logs.length, 1);
 });
+

@@ -33,3 +33,4 @@ test('Sanitizer Unit Tests', async (t) => {
     assert.strictEqual(sanitized.metadata.tags[1], 'tag2');
   });
 });
+

@@ -48,3 +48,4 @@ test('Centralized Error Handler Tests', async (t) => {
 
   await app.close();
 });
+

@@ -72,3 +72,4 @@ test('SEP-10: rejects tampered JWT signature', () => {
   const claims = sep10Service.verifyToken(tamperedToken);
   assert.strictEqual(claims, null);
 });
+

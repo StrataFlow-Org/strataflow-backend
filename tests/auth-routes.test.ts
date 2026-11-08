@@ -89,3 +89,4 @@ test('Auth Route: GET /api/auth/me returns authenticated address', async () => {
   assert.strictEqual(data.authenticated, true);
   assert.strictEqual(data.publicKey, clientKeypair.publicKey());
 });
+

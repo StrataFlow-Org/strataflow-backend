@@ -44,3 +44,4 @@ describe('TtlMonitorService Unit Tests', () => {
     assert.strictEqual(TtlMonitorService.ledgersToDays(8_640), 0.5);
   });
 });
+
