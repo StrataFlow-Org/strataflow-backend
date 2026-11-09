@@ -202,6 +202,12 @@ export class SorobanIndexerService {
           break;
         }
 
+        case 'mut_can':
+        case 'MutualCancelled': {
+          await this.handleMutualCancelled(onChainId);
+          break;
+        }
+
         case 'reject':
         case 'MilestoneRejected': {
           await this.handleMilestoneRejected(onChainId, payload);
@@ -297,6 +303,10 @@ export class SorobanIndexerService {
   }
 
   private async handleTimeoutRefund(onChainId: bigint): Promise<void> {
+    await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
+  }
+
+  private async handleMutualCancelled(onChainId: bigint): Promise<void> {
     await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
   }
 
