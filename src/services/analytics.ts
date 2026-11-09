@@ -36,3 +36,9 @@ export class ProtocolAnalyticsService {
     };
   }
 }
+
+export function calculateEscrowVelocity(volume: string, activeCount: number): string {
+  if (activeCount <= 0) return '0';
+  const volBig = BigInt(volume);
+  return (volBig / BigInt(activeCount)).toString();
+}
