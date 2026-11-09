@@ -64,6 +64,30 @@ export const agreementRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
+  // GET /api/agreements/party/:address - query agreements where address is client, provider, or arbiter
+  fastify.get('/api/agreements/party/:address', async (request, reply) => {
+    const { address } = request.params as { address: string };
+    const { role, limit, offset } = request.query as {
+      role?: 'client' | 'provider' | 'arbiter';
+      limit?: string;
+      offset?: string;
+    };
+
+    const numLimit = limit ? Math.min(100, Math.max(1, parseInt(limit, 10))) : 20;
+    const numOffset = offset ? Math.max(0, parseInt(offset, 10)) : 0;
+
+    const result = await agreementRepo.getAgreementsByParty(address, role, numLimit, numOffset);
+    return reply.send({
+      success: true,
+      data: result.items,
+      pagination: {
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+      },
+    });
+  });
+
   // GET /api/stats - platform escrow metrics
   fastify.get('/api/stats', async (_request, reply) => {
     const stats = await agreementRepo.getStats();
