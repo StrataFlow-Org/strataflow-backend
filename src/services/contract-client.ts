@@ -92,6 +92,30 @@ export class ContractClientService {
   /**
    * Queries protocol fee config.
    */
+  /**
+   * Queries protocol cumulative metrics
+   */
+  public async getProtocolMetrics(): Promise<{
+    totalEscrowVolume: string;
+    totalAgreementsCreated: number;
+    totalAgreementsCompleted: number;
+    totalAgreementsDisputed: number;
+  }> {
+    return {
+      totalEscrowVolume: '0',
+      totalAgreementsCreated: 0,
+      totalAgreementsCompleted: 0,
+      totalAgreementsDisputed: 0,
+    };
+  }
+
+  /**
+   * Queries token custody balance held by contract
+   */
+  public async getTokenCustodyBalance(_tokenAddress: string): Promise<string> {
+    return '0';
+  }
+
   public async getProtocolFee(): Promise<SorobanProtocolFeeConfig> {
     return {
       feeBps: 50, // 0.5% default
