@@ -1,6 +1,6 @@
 # Contributing to StrataFlow Backend
 
-We welcome contributions to the **StrataFlow Backend**! This repository powers the off-chain indexing engine, SEP-10 authentication service, and webhook dispatcher participating in the **Stellar Drips Wave**.
+We welcome contributions to the **StrataFlow Backend**! This repository powers the off-chain indexing engine, SEP-10 authentication service, and webhook dispatcher for the StrataFlow protocol on Stellar.
 
 ---
 

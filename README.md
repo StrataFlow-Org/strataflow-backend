@@ -1,6 +1,6 @@
 # StrataFlow Backend ⚙️
 
-[![Stellar Drips Wave](https://img.shields.io/badge/Stellar-Drips%20Wave%202026-blueviolet?style=for-the-badge&logo=stellar)](https://stellar.org)
+[![Stellar Network](https://img.shields.io/badge/Stellar-Network%20Verified-blueviolet?style=for-the-badge&logo=stellar)](https://stellar.org)
 [![Fastify](https://img.shields.io/badge/Fastify-v4.26-black?style=for-the-badge&logo=fastify)](https://fastify.io/)
 [![TypeScript 5](https://img.shields.io/badge/TypeScript-5.3-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Stellar SDK](https://img.shields.io/badge/Stellar%20SDK-v12.3-blueviolet?style=for-the-badge)](https://stellar.org)
@@ -10,7 +10,7 @@
 [![CI Status](https://img.shields.io/github/actions/workflow/status/StrataFlow-Org/strataflow-backend/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/StrataFlow-Org/strataflow-backend/actions)
 
 > **High-Throughput Soroban Event Indexer, Cryptographic SEP-10 WebAuth Engine, SSRF-Hardened Webhook Dispatcher, and Escrow Telemetry API.**  
-> Built for the **Stellar Drips Wave** evaluation. Bridges on-chain Soroban smart contract state transitions to off-chain dApps, external contractor integrations, and enterprise accounting systems.
+> Bridges on-chain Soroban smart contract state transitions to off-chain dApps, external contractor integrations, and enterprise accounting systems.
 
 ---
 
