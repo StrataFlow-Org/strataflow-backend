@@ -145,6 +145,25 @@ export class AgreementRepository {
     return milestone;
   }
 
+  public async updateAgreementArbiter(onChainId: bigint, newArbiter: string) {
+    const isDb = await this.isDatabaseAvailable();
+    if (isDb) {
+      return prisma.agreement.update({
+        where: { onChainId },
+        data: { arbiterAddress: newArbiter },
+      });
+    }
+
+    const key = onChainId.toString();
+    const agreement = this.inMemoryAgreements.get(key);
+    if (agreement) {
+      agreement.arbiterAddress = newArbiter;
+      agreement.updatedAt = new Date();
+      this.inMemoryAgreements.set(key, agreement);
+    }
+    return agreement;
+  }
+
   public async updateAgreementStatus(onChainId: bigint, status: AgreementStatus, newBalance?: string) {
     const isDb = await this.isDatabaseAvailable();
     if (isDb) {
