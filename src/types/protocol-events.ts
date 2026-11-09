@@ -12,7 +12,9 @@ export type ProtocolEventType =
   | 'MutualCancelled'
   | 'ArbiterReassigned'
   | 'DisputeTimeout'
-  | 'DisputeVerdict';
+  | 'DisputeVerdict'
+  | 'FeeRecipientUpdated'
+  | 'FeeBpsUpdated';
 
 export interface AgreementCreatedEvent {
   type: 'AgreementCreated';
@@ -97,7 +99,15 @@ export type ProtocolEventPayload =
   | DisputeRaisedEvent
   | DisputeResolvedEvent
   | TimeoutRefundClaimedEvent
-  | AgreementCancelledEvent;
+  | AgreementCancelledEvent
+  | AdminNominatedEvent
+  | MilestoneRejectedEvent
+  | MutualCancelledEvent
+  | ArbiterReassignedEvent
+  | DisputeTimeoutEvent
+  | DisputeVerdictEvent
+  | FeeRecipientUpdatedEvent
+  | FeeBpsUpdatedEvent;
 
 
 export interface AdminNominatedEvent {
@@ -148,6 +158,22 @@ export interface DisputeVerdictEvent {
   agreementId: bigint;
   arbiter: string;
   verdictHash: string;
+  ledger: number;
+  txHash: string;
+}
+
+export interface FeeRecipientUpdatedEvent {
+  type: 'FeeRecipientUpdated';
+  oldRecipient: string;
+  newRecipient: string;
+  ledger: number;
+  txHash: string;
+}
+
+export interface FeeBpsUpdatedEvent {
+  type: 'FeeBpsUpdated';
+  oldBps: number;
+  newBps: number;
   ledger: number;
   txHash: string;
 }
