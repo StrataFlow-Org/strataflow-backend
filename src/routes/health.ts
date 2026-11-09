@@ -7,6 +7,19 @@ export const healthRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get('/health', async (_request, reply) => {
     const dbHealth = await checkDatabaseHealth();
     const lastLedger = indexerService.getLastLedger();
+    const rpcProbeStart = Date.now();
+    let rpcLatencyMs = 0;
+    try {
+      await fetch(config.SOROBAN_RPC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getHealth' }),
+        signal: AbortSignal.timeout(1500),
+      });
+      rpcLatencyMs = Date.now() - rpcProbeStart;
+    } catch {
+      rpcLatencyMs = -1;
+    }
 
     const response = {
       status: 'ok',
