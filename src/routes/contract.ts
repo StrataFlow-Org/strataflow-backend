@@ -103,6 +103,16 @@ export async function contractRoutes(fastify: FastifyInstance) {
     }
   );
 
+
+  // GET /api/contract/version-history - upgrade records
+  fastify.get('/api/contract/version-history', async (_req, reply) => {
+    const { ContractVersionTrackerService } = await import('../services/version-tracker.js');
+    return reply.send({
+      success: true,
+      data: ContractVersionTrackerService.getUpgradeHistory(),
+    });
+  });
+
   // Protocol fee configuration
   fastify.get('/api/contract/fees', async (_req: FastifyRequest, reply: FastifyReply) => {
     const feeConfig = await contractClient.getProtocolFee();
