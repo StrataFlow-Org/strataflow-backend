@@ -6,7 +6,8 @@ export type ProtocolEventType =
   | 'DisputeRaised'
   | 'DisputeResolved'
   | 'TimeoutRefundClaimed'
-  | 'AgreementCancelled';
+  | 'AgreementCancelled'
+  | 'AdminNominated';
 
 export interface AgreementCreatedEvent {
   type: 'AgreementCreated';
@@ -93,3 +94,11 @@ export type ProtocolEventPayload =
   | TimeoutRefundClaimedEvent
   | AgreementCancelledEvent;
 
+
+export interface AdminNominatedEvent {
+  type: 'AdminNominated';
+  currentAdmin: string;
+  pendingAdmin: string;
+  ledger: number;
+  txHash: string;
+}
