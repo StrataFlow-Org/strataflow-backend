@@ -122,6 +122,29 @@ export class AgreementRepository {
     return record;
   }
 
+  public async updateMilestoneRejection(onChainId: bigint, index: number, _feedbackHash: string) {
+    const isDb = await this.isDatabaseAvailable();
+    if (isDb) {
+      const agreement = await prisma.agreement.findUnique({ where: { onChainId } });
+      if (!agreement) return null;
+      return prisma.milestone.update({
+        where: { agreementId_index: { agreementId: agreement.id, index } },
+        data: { status: MilestoneStatus.PENDING, proofHash: '' },
+      });
+    }
+
+    const key = onChainId.toString();
+    const agreement = this.inMemoryAgreements.get(key);
+    if (!agreement) return null;
+    const milestone = agreement.milestones?.find((m) => m.index === index);
+    if (milestone) {
+      milestone.status = MilestoneStatus.PENDING;
+      milestone.proofHash = '';
+      agreement.updatedAt = new Date();
+    }
+    return milestone;
+  }
+
   public async updateAgreementStatus(onChainId: bigint, status: AgreementStatus, newBalance?: string) {
     const isDb = await this.isDatabaseAvailable();
     if (isDb) {
