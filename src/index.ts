@@ -1,3 +1,4 @@
+import { metricsRoutes } from './routes/metrics';
 import { healthProbeRoutes } from './routes/health-probes';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
@@ -69,6 +70,7 @@ async function main() {
   // 3. Application Routes
   await app.register(healthRoutes);
   await app.register(healthProbeRoutes);
+  await app.register(metricsRoutes);
   await app.register(authRoutes);
   await app.register(agreementRoutes);
   await app.register(webhookRoutes);
