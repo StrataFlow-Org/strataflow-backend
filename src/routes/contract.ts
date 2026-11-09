@@ -74,6 +74,25 @@ export async function contractRoutes(fastify: FastifyInstance) {
     }
   );
 
+
+  // GET /api/contract/dispute-status/:agreementId
+  fastify.get(
+    '/api/contract/dispute-status/:agreementId',
+    async (req: FastifyRequest<{ Params: { agreementId: string } }>, reply: FastifyReply) => {
+      try {
+        const id = BigInt(req.params.agreementId);
+        const { DisputeTelemetryService } = await import('../services/dispute-telemetry.js');
+        const telemetry = await DisputeTelemetryService.getDisputeStatus(id);
+        if (!telemetry) {
+          return reply.status(404).send({ error: 'Agreement not found' });
+        }
+        return reply.send({ success: true, data: telemetry });
+      } catch {
+        return reply.status(400).send({ error: 'Invalid agreement ID format' });
+      }
+    }
+  );
+
   // Protocol fee configuration
   fastify.get('/api/contract/fees', async (_req: FastifyRequest, reply: FastifyReply) => {
     const feeConfig = await contractClient.getProtocolFee();
