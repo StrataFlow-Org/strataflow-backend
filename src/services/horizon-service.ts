@@ -46,3 +46,8 @@ export class StellarHorizonService {
 }
 
 export const horizonService = new StellarHorizonService();
+
+export function getNativeXlmBalance(telemetry: AccountTelemetry): string {
+  const native = telemetry.balances.find((b) => b.asset === 'XLM');
+  return native ? native.balance : '0';
+}
