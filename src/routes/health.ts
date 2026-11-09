@@ -32,6 +32,11 @@ export const healthRoutes: FastifyPluginAsync = async (fastify) => {
         latencyMs: dbHealth.latencyMs,
         ...(dbHealth.error ? { error: dbHealth.error } : {}),
       },
+      system: {
+        uptimeSeconds: Math.floor(process.uptime()),
+        memoryUsageMb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        rpcLatencyMs,
+      },
       indexer: {
         lastLedger,
         contractId: config.STRATAFLOW_CONTRACT_ID,
