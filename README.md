@@ -2,10 +2,10 @@
 
 [![Stellar Network](https://img.shields.io/badge/Stellar-Network%20Verified-blueviolet?style=for-the-badge&logo=stellar)](https://stellar.org)
 [![Fastify](https://img.shields.io/badge/Fastify-v4.26-black?style=for-the-badge&logo=fastify)](https://fastify.io/)
+[![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0%20Swagger-6BA539?style=for-the-badge&logo=swagger)](https://swagger.io/)
 [![TypeScript 5](https://img.shields.io/badge/TypeScript-5.3-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Stellar SDK](https://img.shields.io/badge/Stellar%20SDK-v12.3-blueviolet?style=for-the-badge)](https://stellar.org)
-[![Prisma ORM](https://img.shields.io/badge/Prisma-v5.22-2D3748?style=for-the-badge&logo=prisma)](https://prisma.io)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql)](https://postgresql.org)
+[![Tests Passing](https://img.shields.io/badge/Tests-163%2F163%20Passed-brightgreen?style=for-the-badge)](https://github.com/StrataFlow-Org/strataflow-backend)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/StrataFlow-Org/strataflow-backend/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/StrataFlow-Org/strataflow-backend/actions)
 
@@ -77,12 +77,18 @@
 ### 1. Protocol & Health Telemetry
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
+| `GET` | `/.well-known/stellar.toml` | SEP-0001 discoverability document declaring protocol configuration, contract IDs, and principals. |
+| `GET` | `/documentation` | Interactive OpenAPI 3.0 Swagger UI documentation portal. |
+| `GET` | `/documentation/json` | Machine-readable OpenAPI 3.0 JSON specification schema. |
 | `GET` | `/health` | Live telemetry probe reporting RPC connectivity, indexer status, and database health. |
 | `GET` | `/api/stats` | High-level platform statistics: total volume, active escrows, completed milestones. |
 | `GET` | `/api/stats/extended` | Deep protocol velocity metrics, dispute frequency, and escrow distribution. |
 | `GET` | `/api/contract/info` | Live on-chain contract version, network passphrase, and token configurations. |
 | `GET` | `/api/contract/fees` | Protocol fee configuration in basis points (capped at 500 bps / 5%) and fee recipient. |
 | `GET` | `/api/contract/ttl/:id`| Evaluates Soroban persistent storage TTL threshold and remaining days. |
+| `GET` | `/api/stellar/account/:publicKey` | Horizon account telemetry, subentry counts, and native XLM balance. |
+| `POST` | `/api/stellar/simulate` | Preflight transaction XDR dry-run simulation and resource fee estimator. |
+| `POST` | `/api/ipfs/verify` | Multi-gateway IPFS CID syntax validation and redundant gateway fallback list. |
 
 ### 2. Cryptographic SEP-10 Authentication
 | Method | Endpoint | Description |
@@ -133,9 +139,9 @@
 
 ---
 
-## 🧪 Comprehensive Automated Test Suite (157 Tests Passing)
+## 🧪 Comprehensive Automated Test Suite (163 Tests Passing)
 
-The backend features 157 unit, integration, and security tests:
+The backend features 163 unit, integration, and security tests:
 
 ```bash
 npm test

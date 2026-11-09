@@ -1,13 +1,15 @@
-import { diagnosticsRoutes } from './routes/diagnostics';
-import { metricsRoutes } from './routes/metrics';
-import { healthProbeRoutes } from './routes/health-probes';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import { config } from './config.js';
 import { securityPlugin } from './plugins/security.js';
 import { errorHandlerPlugin } from './plugins/error-handler.js';
 import { auditHookPlugin } from './plugins/audit.js';
 import { healthRoutes } from './routes/health.js';
+import { healthProbeRoutes } from './routes/health-probes.js';
+import { metricsRoutes } from './routes/metrics.js';
+import { diagnosticsRoutes } from './routes/diagnostics.js';
 import { agreementRoutes } from './routes/agreements.js';
 import { authRoutes } from './routes/auth.js';
 import { webhookRoutes } from './routes/webhooks.js';
@@ -68,7 +70,30 @@ async function main() {
     credentials: true,
   });
 
-  // 3. Application Routes
+  // 3. OpenAPI Documentation
+  await app.register(swagger, {
+    openapi: {
+      info: {
+        title: 'StrataFlow Protocol API',
+        description:
+          'API gateway, event indexer, and SEP-10 authentication service for StrataFlow decentralized escrows on Stellar',
+        version: '1.2.0',
+      },
+      servers: [
+        { url: `http://${config.HOST}:${config.PORT}`, description: 'Local Server' },
+      ],
+    },
+  });
+
+  await app.register(swaggerUi, {
+    routePrefix: '/documentation',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: false,
+    },
+  });
+
+  // 4. Application Routes
   await app.register(healthRoutes);
   await app.register(healthProbeRoutes);
   await app.register(metricsRoutes);
@@ -76,9 +101,11 @@ async function main() {
   await app.register(authRoutes);
   await app.register(agreementRoutes);
   await app.register(webhookRoutes);
+  await app.register(stellarRoutes);
+  await app.register(ipfsRoutes);
   await app.register(contractRoutes);
 
-  // 4. Background Indexer
+  // 5. Background Indexer
   await indexerService.start();
 
   const shutdown = async () => {
@@ -95,7 +122,7 @@ async function main() {
 
   try {
     await app.listen({ port: config.PORT, host: config.HOST });
-    console.log(`🚀 StrataFlow backend listening on port ${config.PORT}`);
+    console.log(`StrataFlow backend listening on port ${config.PORT}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);
