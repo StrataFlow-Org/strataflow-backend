@@ -14,7 +14,9 @@ export type ProtocolEventType =
   | 'DisputeTimeout'
   | 'DisputeVerdict'
   | 'FeeRecipientUpdated'
-  | 'FeeBpsUpdated';
+  | 'FeeBpsUpdated'
+  | 'ContractUpgraded'
+  | 'ProtocolInitialized';
 
 export interface AgreementCreatedEvent {
   type: 'AgreementCreated';
@@ -174,6 +176,20 @@ export interface FeeBpsUpdatedEvent {
   type: 'FeeBpsUpdated';
   oldBps: number;
   newBps: number;
+  ledger: number;
+  txHash: string;
+}
+
+export interface ContractUpgradedEvent {
+  type: 'ContractUpgraded';
+  wasmHash: string;
+  ledger: number;
+  txHash: string;
+}
+
+export interface ProtocolInitializedEvent {
+  type: 'ProtocolInitialized';
+  admin: string;
   ledger: number;
   txHash: string;
 }
