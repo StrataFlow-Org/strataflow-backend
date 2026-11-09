@@ -201,6 +201,12 @@ export class SorobanIndexerService {
           await this.handleTimeoutRefund(onChainId);
           break;
         }
+
+        case 'reject':
+        case 'MilestoneRejected': {
+          await this.handleMilestoneRejected(onChainId, payload);
+          break;
+        }
       }
     } catch (err) {
       console.error(`[SorobanIndexer] Error processing event ${event.id}:`, err);
@@ -292,6 +298,12 @@ export class SorobanIndexerService {
 
   private async handleTimeoutRefund(onChainId: bigint): Promise<void> {
     await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
+  }
+
+  private async handleMilestoneRejected(onChainId: bigint, payload: any): Promise<void> {
+    const milestoneIdx = Number(payload.milestoneIdx ?? 0);
+    const feedbackHash = String(payload.feedbackHash ?? '');
+    await agreementRepo.updateMilestoneRejection(onChainId, milestoneIdx, feedbackHash);
   }
 
   public getEvents(agreementId?: string, type?: string, limit: number = 50): DecodedEvent[] {
