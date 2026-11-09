@@ -222,7 +222,12 @@ export class SorobanIndexerService {
 
         case 'verdict':
         case 'DisputeVerdict': {
-          // Verdict recorded in indexed events history
+          break;
+        }
+
+        case 'upgrade': {
+          const { ContractVersionTrackerService } = await import('./version-tracker.js');
+          ContractVersionTrackerService.recordUpgrade(String(payload.payload ?? payload), event.ledger);
           break;
         }
 
