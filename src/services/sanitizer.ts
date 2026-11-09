@@ -59,3 +59,8 @@ export function sanitizePayload<T>(data: T): T {
   return data;
 }
 
+
+export function validateMilestoneProofFormat(proofHash: string): boolean {
+  if (!proofHash) return true; // Optional proof allowed
+  return proofHash.startsWith('ipfs://') || proofHash.startsWith('Qm') || proofHash.startsWith('bafy');
+}
