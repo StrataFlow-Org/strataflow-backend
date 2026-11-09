@@ -28,6 +28,7 @@
 | :--- | :--- | :--- |
 | `GET` | `/health` | Health check, RPC connectivity, database latency & indexer status. |
 | `GET` | `/api/stats` | Protocol analytics: total volume, active escrows, completed milestones. |
+| `GET` | `/api/stats/extended` | Deep protocol analytics, escrow velocity, and distribution metrics. |
 | `GET` | `/api/contract/info` | On-chain contract version, network passphrase, and token contracts. |
 | `GET` | `/api/contract/fees` | Protocol fee basis points and recipient address. |
 | `GET` | `/api/contract/ttl/:id`| Soroban persistent storage TTL threshold and renewal evaluation. |
@@ -43,15 +44,17 @@
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/agreements` | Paginated directory of agreements with role and status filtering. |
+| `GET` | `/api/agreements/party/:address` | Queries agreements by participant address and role. |
 | `GET` | `/api/agreements/:id` | Full agreement details, milestone proofs, and on-chain event history. |
 | `POST` | `/api/metadata` | Submits off-chain milestone descriptions and stores metadata. |
+| `GET` | `/api/metadata/:cid` | Resolves stored off-chain agreement metadata by CID. |
 
-### Real-time Webhooks
+### Real-time Webhooks (SSRF Hardened)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/webhooks/subscribe`| Subscribes webhook endpoint with HMAC secret key. |
+| `POST` | `/api/webhooks/subscribe`| Subscribes webhook endpoint with HMAC secret key and SSRF validation. |
 | `GET` | `/api/webhooks` | Lists active webhook subscriptions for caller. |
-| `DELETE`| `/api/webhooks/:id` | Unregisters webhook subscription. |
+| `DELETE`| `/api/webhooks/:id` | Unregisters webhook subscription with role verification. |
 | `POST` | `/api/webhooks/test` | Dispatches test payload to verify HMAC signature receipt. |
 
 ---
@@ -70,13 +73,19 @@
 
 ## 🧪 Local Testing & Verification
 
-Execute the comprehensive test suite (98 unit and integration tests):
+Execute the comprehensive test suite (157 unit and integration tests, 100% pass):
 
 ```bash
 npm test
 ```
 
-Execute TypeScript compilation check:
+Execute TypeScript typecheck & lint verification:
+
+```bash
+npm run lint
+```
+
+Execute production build:
 
 ```bash
 npm run build
