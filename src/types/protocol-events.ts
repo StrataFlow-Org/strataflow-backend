@@ -7,7 +7,8 @@ export type ProtocolEventType =
   | 'DisputeResolved'
   | 'TimeoutRefundClaimed'
   | 'AgreementCancelled'
-  | 'AdminNominated';
+  | 'AdminNominated'
+  | 'MilestoneRejected';
 
 export interface AgreementCreatedEvent {
   type: 'AgreementCreated';
@@ -99,6 +100,15 @@ export interface AdminNominatedEvent {
   type: 'AdminNominated';
   currentAdmin: string;
   pendingAdmin: string;
+  ledger: number;
+  txHash: string;
+}
+
+export interface MilestoneRejectedEvent {
+  type: 'MilestoneRejected';
+  agreementId: bigint;
+  milestoneIndex: number;
+  feedbackHash: string;
   ledger: number;
   txHash: string;
 }
