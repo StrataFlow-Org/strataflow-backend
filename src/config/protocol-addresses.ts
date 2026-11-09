@@ -3,6 +3,7 @@ import { StrKey } from '@stellar/stellar-sdk';
 export interface NetworkProtocolConfig {
   network: string;
   rpcUrl: string;
+  horizonUrl: string;
   networkPassphrase: string;
   contractId: string;
   nativeTokenContract: string;
@@ -13,6 +14,7 @@ export const PROTOCOL_NETWORKS: Record<string, NetworkProtocolConfig> = {
   TESTNET: {
     network: 'TESTNET',
     rpcUrl: 'https://soroban-testnet.stellar.org',
+    horizonUrl: 'https://horizon-testnet.stellar.org',
     networkPassphrase: 'Test SDF Network ; September 2015',
     contractId:
       process.env.STRATAFLOW_CONTRACT_ID ||
@@ -27,6 +29,7 @@ export const PROTOCOL_NETWORKS: Record<string, NetworkProtocolConfig> = {
   FUTURENET: {
     network: 'FUTURENET',
     rpcUrl: 'https://rpc-futurenet.stellar.org',
+    horizonUrl: 'https://horizon-futurenet.stellar.org',
     networkPassphrase: 'Test SDF Future Network ; October 2022',
     contractId: process.env.STRATAFLOW_CONTRACT_ID || 'CDXVD3AA43SE2D52ZBJSH3RDKAPOYG6OCDAZGSQD6M5TCBQIG3HTLY6J',
     nativeTokenContract: 'CDLZ73VU7Y4Z45ETK26QU62NDXQJ2277NY2Y57C2ZFU7SS7M6HWT7G4H',
@@ -35,6 +38,7 @@ export const PROTOCOL_NETWORKS: Record<string, NetworkProtocolConfig> = {
   MAINNET: {
     network: 'MAINNET',
     rpcUrl: 'https://soroban-rpc.mainnet.stellar.org',
+    horizonUrl: 'https://horizon.stellar.org',
     networkPassphrase: 'Public Global Stellar Network ; July 2015',
     contractId: process.env.STRATAFLOW_CONTRACT_ID || 'CCW6U2NTRWVRJ22SZ7U4Y3T52TUGV7DMW5X42J7E7W2Q7U6U4N5X6Y7Z',
     nativeTokenContract: 'CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2SLH34QDUST',
