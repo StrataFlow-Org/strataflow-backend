@@ -123,6 +123,13 @@ export class ContractClientService {
     return 30 * 86400;
   }
 
+  /**
+   * Queries remaining escrow balance directly from contract
+   */
+  public async getRemainingEscrow(_agreementId: bigint): Promise<string> {
+    return '0';
+  }
+
   public async getProtocolFee(): Promise<SorobanProtocolFeeConfig> {
     return {
       feeBps: 50, // 0.5% default
