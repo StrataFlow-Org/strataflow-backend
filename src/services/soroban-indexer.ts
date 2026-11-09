@@ -208,6 +208,12 @@ export class SorobanIndexerService {
           break;
         }
 
+        case 'arb_chg':
+        case 'ArbiterReassigned': {
+          await this.handleArbiterReassigned(onChainId, payload);
+          break;
+        }
+
         case 'reject':
         case 'MilestoneRejected': {
           await this.handleMilestoneRejected(onChainId, payload);
@@ -308,6 +314,13 @@ export class SorobanIndexerService {
 
   private async handleMutualCancelled(onChainId: bigint): Promise<void> {
     await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
+  }
+
+  private async handleArbiterReassigned(onChainId: bigint, payload: any): Promise<void> {
+    const newArbiter = String(payload.newArbiter ?? '');
+    if (newArbiter) {
+      await agreementRepo.updateAgreementArbiter(onChainId, newArbiter);
+    }
   }
 
   private async handleMilestoneRejected(onChainId: bigint, payload: any): Promise<void> {
