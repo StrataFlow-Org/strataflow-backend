@@ -37,6 +37,7 @@ test('End-to-End Webhook Dispatch Pipeline', async () => {
     url: webhookUrl,
     eventTypes: ['AgreementCreated'],
     ownerAddress: 'GB_OWNER_E2E',
+    allowLocal: true,
   });
 
   // 3. Ingest an event through indexer

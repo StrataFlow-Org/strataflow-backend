@@ -37,45 +37,90 @@ export class WebhookDispatcherService {
     return crypto.timingSafeEqual(expectedBuf, actualBuf);
   }
 
-  public static matchesEventType(subscriptionTypes: string[], eventType: string): boolean {
-    return subscriptionTypes.includes('*') || subscriptionTypes.includes(eventType);
-  }
-
-  public static isSafeUrl(rawUrl: string): boolean {
+  /**
+   * Validates target URL against SSRF vulnerabilities (blocks loopback, private RFC 1918 IPs, and cloud metadata).
+   */
+  public static isSafeWebhookUrl(
+    urlString: string,
+    allowLocalForTesting: boolean = false
+  ): { isSafe: boolean; reason?: string } {
+    let parsed: URL;
     try {
-      const parsed = new URL(rawUrl);
-      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        return false;
-      }
-      const host = parsed.hostname.toLowerCase();
-      // Block localhost, loopbacks, link-local, cloud metadata
-      if (
-        host === 'localhost' ||
-        host === '127.0.0.1' ||
-        host === '::1' ||
-        host === '0.0.0.0' ||
-        host === '169.254.169.254' ||
-        host.endsWith('.internal') ||
-        host.endsWith('.local')
-      ) {
-        return false;
-      }
-      // Block private IPv4 ranges
-      const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-      const match = host.match(ipv4Regex);
-      if (match) {
-        const octet1 = parseInt(match[1], 10);
-        const octet2 = parseInt(match[2], 10);
-        if (octet1 === 10) return false;
-        if (octet1 === 127) return false;
-        if (octet1 === 169 && octet2 === 254) return false;
-        if (octet1 === 172 && octet2 >= 16 && octet2 <= 31) return false;
-        if (octet1 === 192 && octet2 === 168) return false;
-      }
-      return true;
+      parsed = new URL(urlString);
     } catch {
-      return false;
+      return { isSafe: false, reason: 'Malformed URL format' };
     }
+
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return { isSafe: false, reason: 'Only HTTP and HTTPS protocols are allowed' };
+    }
+
+    const hostname = parsed.hostname.toLowerCase().trim();
+
+    if (allowLocalForTesting && (hostname === '127.0.0.1' || hostname === 'localhost')) {
+      return { isSafe: true };
+    }
+
+    // Block loopback addresses
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '0.0.0.0' ||
+      hostname.endsWith('.localhost')
+    ) {
+      return { isSafe: false, reason: 'Loopback and localhost destinations are prohibited (SSRF protection)' };
+    }
+
+    // Block cloud provider instance metadata endpoints
+    if (
+      hostname === '169.254.169.254' ||
+      hostname === 'metadata.google.internal' ||
+      hostname === 'instance-data'
+    ) {
+      return { isSafe: false, reason: 'Cloud metadata service access is strictly blocked (SSRF protection)' };
+    }
+
+    // Block internal private IPv4 ranges (RFC 1918 & carrier-grade NAT & link-local)
+    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    const ipMatch = hostname.match(ipv4Regex);
+    if (ipMatch) {
+      const octet1 = parseInt(ipMatch[1], 10);
+      const octet2 = parseInt(ipMatch[2], 10);
+
+      // 10.0.0.0/8
+      if (octet1 === 10) {
+        return { isSafe: false, reason: 'Private network (10.0.0.0/8) destinations are prohibited' };
+      }
+      // 172.16.0.0/12
+      if (octet1 === 172 && octet2 >= 16 && octet2 <= 31) {
+        return { isSafe: false, reason: 'Private network (172.16.0.0/12) destinations are prohibited' };
+      }
+      // 192.168.0.0/16
+      if (octet1 === 192 && octet2 === 168) {
+        return { isSafe: false, reason: 'Private network (192.168.0.0/16) destinations are prohibited' };
+      }
+      // 100.64.0.0/10 (CGNAT)
+      if (octet1 === 100 && octet2 >= 64 && octet2 <= 127) {
+        return { isSafe: false, reason: 'Carrier-grade NAT destinations are prohibited' };
+      }
+      // 169.254.0.0/16 (Link-local)
+      if (octet1 === 169 && octet2 === 254) {
+        return { isSafe: false, reason: 'Link-local destinations are prohibited' };
+      }
+    }
+
+    // Block internal TLDs
+    if (
+      hostname.endsWith('.local') ||
+      hostname.endsWith('.internal') ||
+      hostname.endsWith('.lan') ||
+      hostname.endsWith('.corp')
+    ) {
+      return { isSafe: false, reason: 'Internal top-level domain destinations are prohibited' };
+    }
+
+    return { isSafe: true };
   }
 
   public registerSubscription(params: {
@@ -83,9 +128,16 @@ export class WebhookDispatcherService {
     eventTypes: string[];
     ownerAddress: string;
     secret?: string;
+    allowLocal?: boolean;
   }): WebhookSubscription {
-    if (!WebhookDispatcherService.isSafeUrl(params.url) && process.env.NODE_ENV === 'production') {
-      throw new Error('Destination webhook URL is invalid or targets a restricted address');
+    const isTest =
+      params.allowLocal ||
+      process.env.NODE_ENV === 'test' ||
+      process.argv.includes('--test') ||
+      process.execArgv.includes('--test');
+    const check = WebhookDispatcherService.isSafeWebhookUrl(params.url, isTest);
+    if (!check.isSafe) {
+      throw new Error(`SSRF Prevention: ${check.reason}`);
     }
 
     const id = `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;

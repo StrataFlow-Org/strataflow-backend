@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
 import { webhookDispatcher, WebhookDispatcherService } from '../services/webhook-dispatcher.js';
+import { sep10Service } from '../services/sep10-auth.js';
 
 export const webhookRoutes: FastifyPluginAsync = async (fastify) => {
   // POST /api/webhooks/subscribe - register new webhook URL
@@ -16,23 +17,32 @@ export const webhookRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(400).send({ error: parsed.error.issues[0].message });
     }
 
-    if (!WebhookDispatcherService.isSafeUrl(parsed.data.url)) {
-      return reply.status(400).send({ error: 'Destination webhook URL is invalid or targets a restricted host' });
+    // SSRF Prevention Check
+    const ssrfCheck = WebhookDispatcherService.isSafeWebhookUrl(parsed.data.url);
+    if (!ssrfCheck.isSafe) {
+      return reply.status(400).send({
+        error: `SSRF Prevention: ${ssrfCheck.reason}`,
+      });
     }
 
-    const subscription = webhookDispatcher.registerSubscription(parsed.data);
+    try {
+      const subscription = webhookDispatcher.registerSubscription(parsed.data);
 
-    return reply.status(201).send({
-      success: true,
-      subscription: {
-        id: subscription.id,
-        url: subscription.url,
-        secret: subscription.secret,
-        eventTypes: subscription.eventTypes,
-        ownerAddress: subscription.ownerAddress,
-        createdAt: subscription.createdAt,
-      },
-    });
+      return reply.status(201).send({
+        success: true,
+        subscription: {
+          id: subscription.id,
+          url: subscription.url,
+          secret: subscription.secret,
+          eventTypes: subscription.eventTypes,
+          ownerAddress: subscription.ownerAddress,
+          createdAt: subscription.createdAt,
+        },
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to register webhook';
+      return reply.status(400).send({ error: msg });
+    }
   });
 
   // GET /api/webhooks - list subscriptions
@@ -57,8 +67,27 @@ export const webhookRoutes: FastifyPluginAsync = async (fastify) => {
   // DELETE /api/webhooks/:subscriptionId - delete webhook
   fastify.delete('/api/webhooks/:subscriptionId', async (request, reply) => {
     const { subscriptionId } = request.params as { subscriptionId: string };
-    const deleted = webhookDispatcher.removeSubscription(subscriptionId);
+    const sub = webhookDispatcher.getSubscription(subscriptionId);
 
+    if (!sub) {
+      return reply.status(404).send({ error: 'Subscription not found' });
+    }
+
+    // Authorization verification: verify SEP-10 Bearer JWT or X-Webhook-Secret if provided
+    const authHeader = request.headers.authorization;
+    const secretHeader = request.headers['x-webhook-secret'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const claims = sep10Service.verifyToken(authHeader.substring(7));
+      if (!claims || claims.sub !== sub.ownerAddress) {
+        return reply.status(403).send({ error: 'Unauthorized to delete this webhook subscription' });
+      }
+    } else if (secretHeader) {
+      if (secretHeader !== sub.secret) {
+        return reply.status(403).send({ error: 'Invalid webhook secret' });
+      }
+    }
+
+    const deleted = webhookDispatcher.removeSubscription(subscriptionId);
     if (!deleted) {
       return reply.status(404).send({ error: 'Subscription not found' });
     }

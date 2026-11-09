@@ -26,8 +26,13 @@ export class SorobanIndexerService {
       this.lastLedger = initialLedger;
     } else {
       try {
-        const latest = await this.server.getLatestLedger();
-        this.lastLedger = latest.sequence;
+        const highestIndexed = await agreementRepo.getHighestIndexedLedger();
+        if (highestIndexed && highestIndexed > 0) {
+          this.lastLedger = highestIndexed + 1;
+        } else {
+          const latest = await this.server.getLatestLedger();
+          this.lastLedger = latest.sequence;
+        }
       } catch {
         this.lastLedger = 1;
       }
@@ -92,6 +97,12 @@ export class SorobanIndexerService {
           });
 
           this.processedEventIds.add(raw.id);
+          if (this.processedEventIds.size > 10000) {
+            const ids = Array.from(this.processedEventIds);
+            for (let i = 0; i < 3000; i++) {
+              this.processedEventIds.delete(ids[i]);
+            }
+          }
           this.recordEvent(decoded);
           await this.processDecodedEvent(decoded);
           newEvents.push(decoded);

@@ -31,6 +31,40 @@ test('Webhook Routes Integration Tests', async (t) => {
     createdId = body.subscription.id;
   });
 
+  await t.test('POST /api/webhooks/subscribe blocks SSRF loopback and private IPs', async () => {
+    const loopbackRes = await app.inject({
+      method: 'POST',
+      url: '/api/webhooks/subscribe',
+      payload: {
+        url: 'http://localhost:3000/internal-admin',
+        ownerAddress: 'GB_OWNER_1234567890',
+      },
+    });
+    assert.strictEqual(loopbackRes.statusCode, 400);
+    const loopbackBody = JSON.parse(loopbackRes.payload);
+    assert.ok(loopbackBody.error.includes('SSRF Prevention'));
+
+    const metadataRes = await app.inject({
+      method: 'POST',
+      url: '/api/webhooks/subscribe',
+      payload: {
+        url: 'http://169.254.169.254/latest/meta-data/',
+        ownerAddress: 'GB_OWNER_1234567890',
+      },
+    });
+    assert.strictEqual(metadataRes.statusCode, 400);
+
+    const privateRes = await app.inject({
+      method: 'POST',
+      url: '/api/webhooks/subscribe',
+      payload: {
+        url: 'http://192.168.1.1/router-login',
+        ownerAddress: 'GB_OWNER_1234567890',
+      },
+    });
+    assert.strictEqual(privateRes.statusCode, 400);
+  });
+
   await t.test('GET /api/webhooks lists subscriptions filtered by owner', async () => {
     const res = await app.inject({
       method: 'GET',

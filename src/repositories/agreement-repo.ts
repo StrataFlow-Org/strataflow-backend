@@ -47,6 +47,7 @@ export interface PlatformStats {
 export class AgreementRepository {
   private inMemoryAgreements: Map<string, AgreementData & { id: string; createdAt: Date; updatedAt: Date }> = new Map();
   private inMemoryEvents: any[] = [];
+  private inMemoryMetadata: Map<string, { title: string; description: string; milestoneDescriptions: string[]; createdAt: Date }> = new Map();
   private useDatabase: boolean | null = null;
 
   public async isDatabaseAvailable(): Promise<boolean> {
@@ -464,9 +465,40 @@ export class AgreementRepository {
     };
   }
 
+  public async getHighestIndexedLedger(): Promise<number> {
+    const isDb = await this.isDatabaseAvailable();
+    if (isDb) {
+      try {
+        const latest = await prisma.indexedEvent.findFirst({
+          orderBy: { ledger: 'desc' },
+          select: { ledger: true },
+        });
+        return latest?.ledger || 0;
+      } catch {
+        return 0;
+      }
+    }
+    if (this.inMemoryEvents.length > 0) {
+      return Math.max(...this.inMemoryEvents.map((e) => e.ledger || 0));
+    }
+    return 0;
+  }
+
+  public saveMetadata(
+    cid: string,
+    data: { title: string; description: string; milestoneDescriptions: string[] }
+  ): void {
+    this.inMemoryMetadata.set(cid, { ...data, createdAt: new Date() });
+  }
+
+  public getMetadata(cid: string) {
+    return this.inMemoryMetadata.get(cid);
+  }
+
   public clearInMemory() {
     this.inMemoryAgreements.clear();
     this.inMemoryEvents = [];
+    this.inMemoryMetadata.clear();
   }
 }
 

@@ -88,7 +88,6 @@ export const agreementRoutes: FastifyPluginAsync = async (fastify) => {
     });
   });
 
-
   // GET /api/stats/extended - deep protocol analytics
   fastify.get('/api/stats/extended', async (_request, reply) => {
     const { ProtocolAnalyticsService } = await import('../services/analytics.js');
@@ -172,11 +171,25 @@ export const agreementRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     const mockCid = `QmStrataFlowMeta${Date.now()}`;
+    agreementRepo.saveMetadata(mockCid, parsed.data);
 
     return {
       success: true,
       ipfsHash: mockCid,
       metadata: parsed.data,
+    };
+  });
+
+  fastify.get('/api/metadata/:cid', async (request, reply) => {
+    const { cid } = request.params as { cid: string };
+    const metadata = agreementRepo.getMetadata(cid);
+    if (!metadata) {
+      return reply.status(404).send({ error: 'Metadata not found' });
+    }
+    return {
+      success: true,
+      cid,
+      metadata,
     };
   });
 };
