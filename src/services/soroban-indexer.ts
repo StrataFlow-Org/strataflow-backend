@@ -214,6 +214,18 @@ export class SorobanIndexerService {
           break;
         }
 
+        case 'disp_to':
+        case 'DisputeTimeout': {
+          await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
+          break;
+        }
+
+        case 'verdict':
+        case 'DisputeVerdict': {
+          // Verdict recorded in indexed events history
+          break;
+        }
+
         case 'reject':
         case 'MilestoneRejected': {
           await this.handleMilestoneRejected(onChainId, payload);
