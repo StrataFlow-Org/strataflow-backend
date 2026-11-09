@@ -12,6 +12,8 @@ describe('TtlMonitorService Unit Tests', () => {
     assert.strictEqual(status.remainingLedgers, 400_000);
     assert.strictEqual(status.needsExtension, false);
     assert.strictEqual(status.recommendedBumpAmount, 0);
+    assert.strictEqual(status.healthStatus, 'STORAGE_HEALTHY');
+    assert.ok(status.actionableRemediation.includes('healthy'));
   });
 
   it('identifies entry that DOES need extension when below threshold', () => {
@@ -24,6 +26,20 @@ describe('TtlMonitorService Unit Tests', () => {
     assert.strictEqual(status.needsExtension, true);
     // target is 518,400 - 50,000 = 468,400
     assert.strictEqual(status.recommendedBumpAmount, 468_400);
+    assert.strictEqual(status.healthStatus, 'EXTENSION_RECOMMENDED');
+    assert.ok(status.actionableRemediation.includes('bump_agreement_ttl'));
+  });
+
+  it('identifies entry in critical state when under critical threshold', () => {
+    const currentLedger = 500_000;
+    const liveUntilLedger = 510_000; // 10,000 remaining (<= 20,000 critical threshold)
+
+    const status = TtlMonitorService.evaluateTtl(1n, currentLedger, liveUntilLedger);
+
+    assert.strictEqual(status.remainingLedgers, 10_000);
+    assert.strictEqual(status.needsExtension, true);
+    assert.strictEqual(status.healthStatus, 'CRITICAL_EXTENSION_REQUIRED');
+    assert.ok(status.actionableRemediation.includes('Urgent'));
   });
 
   it('handles expired entry gracefully with 0 remaining ledgers', () => {
@@ -44,4 +60,3 @@ describe('TtlMonitorService Unit Tests', () => {
     assert.strictEqual(TtlMonitorService.ledgersToDays(8_640), 0.5);
   });
 });
-

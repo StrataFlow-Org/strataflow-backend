@@ -119,8 +119,67 @@ export class ContractClientService {
   /**
    * Queries remaining seconds for dispute resolution
    */
-  public async getDisputeWindowRemaining(_agreementId: bigint): Promise<number> {
-    return 30 * 86400;
+  public async getDisputeWindowRemaining(agreementId: bigint): Promise<number> {
+    try {
+      const dummyKey = Keypair.random().publicKey();
+      const dummyAccount = new Account(dummyKey, '100');
+      const contract = new Contract(this.config.contractId);
+      const op = contract.call(
+        'get_dispute_window_remaining',
+        nativeToScVal(agreementId, { type: 'u64' })
+      );
+
+      const tx = new TransactionBuilder(dummyAccount, {
+        fee: '100',
+        networkPassphrase: this.config.networkPassphrase,
+      })
+        .addOperation(op)
+        .setTimeout(30)
+        .build();
+
+      const sim = await this.server.simulateTransaction(tx);
+      if (rpc.Api.isSimulationSuccess(sim) && sim.result) {
+        return Number(scValToNative(sim.result.retval));
+      }
+      return 30 * 86400;
+    } catch {
+      return 30 * 86400;
+    }
+  }
+
+  /**
+   * Queries milestone rejection count for rework iteration tracking
+   */
+  public async getMilestoneRejectionCount(
+    agreementId: bigint,
+    milestoneIdx: number
+  ): Promise<number> {
+    try {
+      const dummyKey = Keypair.random().publicKey();
+      const dummyAccount = new Account(dummyKey, '100');
+      const contract = new Contract(this.config.contractId);
+      const op = contract.call(
+        'get_milestone_rejection_count',
+        nativeToScVal(agreementId, { type: 'u64' }),
+        nativeToScVal(milestoneIdx, { type: 'u32' })
+      );
+
+      const tx = new TransactionBuilder(dummyAccount, {
+        fee: '100',
+        networkPassphrase: this.config.networkPassphrase,
+      })
+        .addOperation(op)
+        .setTimeout(30)
+        .build();
+
+      const sim = await this.server.simulateTransaction(tx);
+      if (rpc.Api.isSimulationSuccess(sim) && sim.result) {
+        return Number(scValToNative(sim.result.retval));
+      }
+      return 0;
+    } catch {
+      return 0;
+    }
   }
 
   /**

@@ -24,6 +24,7 @@ export const ipfsRoutes: FastifyPluginAsync = async (fastify) => {
       data: {
         ...verification,
         gatewayUrl: customGatewayUrl,
+        fallbackGateways: IpfsVerifierService.getAllGatewayUrls(parsed.data.cid),
       },
     });
   });

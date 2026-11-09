@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-11-09
+
+### Added & Hardened
+- **IPFS Multi-Gateway Redundancy Pipeline**: Integrated redundant gateway resolution across Cloudflare IPFS, Pinata, DWeb.link, and IPFS.io in `IpfsVerifierService.getAllGatewayUrls` and `/api/ipfs/verify`.
+- **Actionable Storage TTL Monitoring**: Enhanced `/api/contract/ttl/:agreementId` with explicit `healthStatus` classifications (`STORAGE_HEALTHY`, `EXTENSION_RECOMMENDED`, `CRITICAL_EXTENSION_REQUIRED`) and actionable on-chain remediation guidance.
+- **On-Chain Dispute & Milestone Queries**: Added simulation queries in `ContractClientService` for `getDisputeWindowRemaining` and `getMilestoneRejectionCount`.
+- **Contribution Standards**: Streamlined issue and PR templates with dedicated protocol task specifications.
+
 ## [1.1.0] - 2026-11-09
 
 ### Security Hardening
