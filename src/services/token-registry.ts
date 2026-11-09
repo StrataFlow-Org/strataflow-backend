@@ -34,3 +34,11 @@ export class TokenRegistryService {
     return this.TOKENS.find((t) => t.contractAddress === address);
   }
 }
+
+export function convertToSmallestUnit(amount: string, decimals = 7): bigint {
+  const parts = amount.split('.');
+  const whole = BigInt(parts[0] || '0') * BigInt(10 ** decimals);
+  if (!parts[1]) return whole;
+  const fractionalStr = parts[1].slice(0, decimals).padEnd(decimals, '0');
+  return whole + BigInt(fractionalStr);
+}
