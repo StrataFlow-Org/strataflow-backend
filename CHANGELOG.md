@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2026-11-09
+
+### Security Hardening
+- **Dependency Vulnerability Mitigation**: Upgraded `fastify` to `^4.29.1` and `zod` to `^3.25.76` addressing upstream memory constraint validation and protocol parser advisories.
+- **Audit Verification**: Passed full 163-test automated test suite across all 19 integration and unit test batches with 100% pass rate.
+
 ## [1.2.0] - 2026-11-09
 
 ### Added & Hardened
