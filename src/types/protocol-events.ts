@@ -8,7 +8,8 @@ export type ProtocolEventType =
   | 'TimeoutRefundClaimed'
   | 'AgreementCancelled'
   | 'AdminNominated'
-  | 'MilestoneRejected';
+  | 'MilestoneRejected'
+  | 'MutualCancelled';
 
 export interface AgreementCreatedEvent {
   type: 'AgreementCreated';
@@ -109,6 +110,15 @@ export interface MilestoneRejectedEvent {
   agreementId: bigint;
   milestoneIndex: number;
   feedbackHash: string;
+  ledger: number;
+  txHash: string;
+}
+
+export interface MutualCancelledEvent {
+  type: 'MutualCancelled';
+  agreementId: bigint;
+  client: string;
+  refundAmount: bigint;
   ledger: number;
   txHash: string;
 }
