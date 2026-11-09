@@ -27,8 +27,8 @@ export class StellarHorizonService {
   public async getAccountTelemetry(publicKey: string): Promise<AccountTelemetry | null> {
     try {
       const account = await this.server.loadAccount(publicKey);
-      const balances: AccountBalanceInfo[] = account.balances.map((b) => ({
-        asset: b.asset_type === 'native' ? 'XLM' : `${b.asset_code}:${b.asset_issuer}`,
+      const balances: AccountBalanceInfo[] = account.balances.map((b: any) => ({
+        asset: b.asset_type === 'native' ? 'XLM' : `${b.asset_code || 'LP'}:${b.asset_issuer || ''}`,
         balance: b.balance,
         issuer: b.asset_type !== 'native' ? b.asset_issuer : undefined,
       }));

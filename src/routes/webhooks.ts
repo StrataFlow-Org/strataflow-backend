@@ -66,19 +66,6 @@ export const webhookRoutes: FastifyPluginAsync = async (fastify) => {
     return reply.send({ success: true, message: 'Subscription successfully removed' });
   });
 
-
-  // GET /api/webhooks/deliveries - inspect delivery history
-  fastify.get('/api/webhooks/deliveries', async (req, reply) => {
-    const { subscriptionId, limit } = req.query as { subscriptionId?: string; limit?: string };
-    const numLimit = limit ? parseInt(limit, 10) : 50;
-    const history = webhookDispatcher.getRecentDeliveries(numLimit, subscriptionId);
-    return reply.send({
-      success: true,
-      data: history,
-      count: history.length,
-    });
-  });
-
   // POST /api/webhooks/test - trigger mock test event
   fastify.post('/api/webhooks/test', async (request, reply) => {
     const schema = z.object({
