@@ -11,7 +11,8 @@ export type ProtocolEventType =
   | 'MilestoneRejected'
   | 'MutualCancelled'
   | 'ArbiterReassigned'
-  | 'DisputeTimeout';
+  | 'DisputeTimeout'
+  | 'DisputeVerdict';
 
 export interface AgreementCreatedEvent {
   type: 'AgreementCreated';
@@ -138,6 +139,15 @@ export interface DisputeTimeoutEvent {
   type: 'DisputeTimeout';
   agreementId: bigint;
   refundAmount: bigint;
+  ledger: number;
+  txHash: string;
+}
+
+export interface DisputeVerdictEvent {
+  type: 'DisputeVerdict';
+  agreementId: bigint;
+  arbiter: string;
+  verdictHash: string;
   ledger: number;
   txHash: string;
 }
