@@ -37,6 +37,10 @@ export class WebhookDispatcherService {
     return crypto.timingSafeEqual(expectedBuf, actualBuf);
   }
 
+  public static matchesEventType(subscriptionTypes: string[], eventType: string): boolean {
+    return subscriptionTypes.includes('*') || subscriptionTypes.includes(eventType);
+  }
+
   public static isSafeUrl(rawUrl: string): boolean {
     try {
       const parsed = new URL(rawUrl);
