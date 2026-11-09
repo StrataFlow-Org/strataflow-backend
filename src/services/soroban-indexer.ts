@@ -225,6 +225,11 @@ export class SorobanIndexerService {
           break;
         }
 
+        case 'init': {
+          // Protocol initialized on-chain
+          break;
+        }
+
         case 'upgrade': {
           const { ContractVersionTrackerService } = await import('./version-tracker.js');
           ContractVersionTrackerService.recordUpgrade(String(payload.payload ?? payload), event.ledger);
