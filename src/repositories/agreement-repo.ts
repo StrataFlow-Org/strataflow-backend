@@ -252,6 +252,52 @@ export class AgreementRepository {
     return milestone;
   }
 
+  public async getAgreementsByParty(address: string, role?: 'client' | 'provider' | 'arbiter', limit = 20, offset = 0) {
+    const isDb = await this.isDatabaseAvailable();
+    if (isDb) {
+      const where: any = role === 'client'
+        ? { clientAddress: address }
+        : role === 'provider'
+        ? { providerAddress: address }
+        : role === 'arbiter'
+        ? { arbiterAddress: address }
+        : {
+            OR: [
+              { clientAddress: address },
+              { providerAddress: address },
+              { arbiterAddress: address },
+            ],
+          };
+
+      const [items, total] = await Promise.all([
+        prisma.agreement.findMany({
+          where,
+          take: limit,
+          skip: offset,
+          orderBy: { createdAt: 'desc' },
+          include: { milestones: { orderBy: { index: 'asc' } } },
+        }),
+        prisma.agreement.count({ where }),
+      ]);
+      return { items, total, limit, offset };
+    }
+
+    let items = Array.from(this.inMemoryAgreements.values());
+    if (role === 'client') {
+      items = items.filter((a) => a.clientAddress === address);
+    } else if (role === 'provider') {
+      items = items.filter((a) => a.providerAddress === address);
+    } else if (role === 'arbiter') {
+      items = items.filter((a) => a.arbiterAddress === address);
+    } else {
+      items = items.filter((a) => a.clientAddress === address || a.providerAddress === address || a.arbiterAddress === address);
+    }
+
+    const total = items.length;
+    const paginated = items.slice(offset, offset + limit);
+    return { items: paginated, total, limit, offset };
+  }
+
   public async getAgreements(filters: AgreementQueryFilters = {}) {
     const isDb = await this.isDatabaseAvailable();
     const limit = filters.limit ? Math.min(100, Math.max(1, filters.limit)) : 20;
