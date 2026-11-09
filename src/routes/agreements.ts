@@ -88,6 +88,17 @@ export const agreementRoutes: FastifyPluginAsync = async (fastify) => {
     });
   });
 
+
+  // GET /api/stats/extended - deep protocol analytics
+  fastify.get('/api/stats/extended', async (_request, reply) => {
+    const { ProtocolAnalyticsService } = await import('../services/analytics.js');
+    const analytics = await ProtocolAnalyticsService.getExtendedAnalytics();
+    return reply.send({
+      success: true,
+      data: analytics,
+    });
+  });
+
   // GET /api/stats - platform escrow metrics
   fastify.get('/api/stats', async (_request, reply) => {
     const stats = await agreementRepo.getStats();
