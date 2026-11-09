@@ -1,28 +1,67 @@
 # Contributing to StrataFlow Backend
 
-We welcome contributions to the StrataFlow backend API and indexer! This project participates in the **Stellar Drips Wave**.
+We welcome contributions to the **StrataFlow Backend**! This repository powers the off-chain indexing engine, SEP-10 authentication service, and webhook dispatcher participating in the **Stellar Drips Wave**.
 
 ---
 
-## 🛠️ Getting Started
+## 🛠️ Development Setup
 
-1. Ensure you have **Node.js 20+** installed.
-2. Fork and clone the repository:
-   ```bash
-   git clone https://github.com/StrataFlow-Org/strataflow-backend.git
-   cd strataflow-backend
-   npm install
-   ```
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
+### 1. Prerequisites
+- **Node.js**: v20.x or v22.x LTS
+- **npm**: v10.x+
+- **PostgreSQL**: v16 (optional; the repository automatically operates with in-memory persistence if no database is connected)
+
+### 2. Local Setup
+```bash
+# Clone the repository
+git clone https://github.com/StrataFlow-Org/strataflow-backend.git
+cd strataflow-backend
+
+# Install dependencies
+npm install
+
+# Copy environment template
+cp .env.example .env
+
+# Start development server with file watching
+npm run dev
+```
 
 ---
 
-## 🏷️ Issue & PR Guidelines for Drips Wave
+## 🧪 Testing & Verification
 
-- **Low / Trivial**: Adding request validation schemas, adding log formatters, documentation updates.
-- **Medium**: Adding Redis queue persistence for RPC event processing, expanding SEP-10 test suites.
-- **High**: Implementing full database migration with Prisma and PostgreSQL for historical event replay.
+All contributions must satisfy automated verification before merge:
 
+```bash
+# Run unit and integration tests (157 tests)
+npm test
+
+# Run TypeScript type check
+npm run lint
+
+# Compile production build
+npm run build
+```
+
+---
+
+## 🌿 Contribution Workflow
+
+1. Create a feature branch:
+   ```bash
+   git checkout -b feat/your-improvement
+   ```
+2. Adhere to Conventional Commits:
+   - `feat(scope): ...`
+   - `fix(scope): ...`
+   - `test(scope): ...`
+   - `docs(scope): ...`
+3. Verify that zero secret keys or private seeds are exposed in test assertions or fixtures.
+4. Submit your pull request with complete reproduction steps.
+
+---
+
+## 📜 Code of Conduct
+
+All contributors must abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
