@@ -29,6 +29,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
 ENV HOST=0.0.0.0
+ENV NODE_OPTIONS="--max-old-space-size=2048 --no-deprecation"
 
 RUN apk add --no-cache openssl dumb-init
 
