@@ -8,8 +8,10 @@
 [![Tests Passing](https://img.shields.io/badge/Tests-163%2F163%20Passed-brightgreen?style=for-the-badge)](https://github.com/StrataFlow-Org/strataflow-backend)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/StrataFlow-Org/strataflow-backend/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/StrataFlow-Org/strataflow-backend/actions)
+[![Live Frontend DApp](https://img.shields.io/badge/Frontend-strataflow--web.vercel.app-black?style=for-the-badge&logo=vercel)](https://strataflow-web.vercel.app)
 
 > **High-Throughput Soroban Event Indexer, Cryptographic SEP-10 WebAuth Engine, SSRF-Hardened Webhook Dispatcher, and Escrow Telemetry API.**  
+> 🌐 **Live Web Application:** [https://strataflow-web.vercel.app](https://strataflow-web.vercel.app)  
 > Bridges on-chain Soroban smart contract state transitions to off-chain dApps, external contractor integrations, and enterprise accounting systems.
 
 ---
