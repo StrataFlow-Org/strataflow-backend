@@ -120,6 +120,31 @@ export class SorobanEventDecoder {
         }
         break;
 
+      case 'arb_chg':
+        if (Array.isArray(decodedValue)) {
+          data.oldArbiter = decodedValue[0];
+          data.newArbiter = decodedValue[1];
+        }
+        break;
+
+      case 'disp_to':
+        data.refundAmount = decodedValue;
+        break;
+
+      case 'verdict':
+        if (Array.isArray(decodedValue)) {
+          data.arbiter = decodedValue[0];
+          data.verdictHash = decodedValue[1];
+        }
+        break;
+
+      case 'nom_adm':
+        if (Array.isArray(decodedValue)) {
+          data.currentAdmin = decodedValue[0];
+          data.pendingAdmin = decodedValue[1];
+        }
+        break;
+
       case 'fee_paid':
         data.milestoneIdx = decodedTopics[2];
         if (Array.isArray(decodedValue)) {
