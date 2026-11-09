@@ -37,6 +37,11 @@ export const healthRoutes: FastifyPluginAsync = async (fastify) => {
         memoryUsageMb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
         rpcLatencyMs,
       },
+      telemetry: {
+        contractId: config.STRATAFLOW_CONTRACT_ID,
+        network: config.STELLAR_NETWORK,
+        environment: config.NODE_ENV,
+      },
       indexer: {
         lastLedger,
         contractId: config.STRATAFLOW_CONTRACT_ID,
