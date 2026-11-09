@@ -9,7 +9,8 @@ export type ProtocolEventType =
   | 'AgreementCancelled'
   | 'AdminNominated'
   | 'MilestoneRejected'
-  | 'MutualCancelled';
+  | 'MutualCancelled'
+  | 'ArbiterReassigned';
 
 export interface AgreementCreatedEvent {
   type: 'AgreementCreated';
@@ -119,6 +120,15 @@ export interface MutualCancelledEvent {
   agreementId: bigint;
   client: string;
   refundAmount: bigint;
+  ledger: number;
+  txHash: string;
+}
+
+export interface ArbiterReassignedEvent {
+  type: 'ArbiterReassigned';
+  agreementId: bigint;
+  oldArbiter: string;
+  newArbiter: string;
   ledger: number;
   txHash: string;
 }
