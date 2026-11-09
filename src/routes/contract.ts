@@ -26,6 +26,16 @@ export async function contractRoutes(fastify: FastifyInstance) {
     });
   });
 
+
+  // GET /api/tokens - verified supported token contracts
+  fastify.get('/api/tokens', async (_req, reply) => {
+    const { TokenRegistryService } = await import('../services/token-registry.js');
+    return reply.send({
+      success: true,
+      data: TokenRegistryService.getSupportedTokens(),
+    });
+  });
+
   // Protocol operational metrics
   fastify.get('/api/contract/metrics', async (_req: FastifyRequest, reply: FastifyReply) => {
     const metrics = await contractClient.getProtocolMetrics();
