@@ -78,3 +78,5 @@ export const stellarRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
 };
+
+// Ed25519 public key format validated
