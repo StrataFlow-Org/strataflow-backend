@@ -246,6 +246,11 @@ export class WebhookDispatcherService {
     }
   }
 
+  public getRecentDeliveries(limit: number = 50, subscriptionId?: string): WebhookDeliveryAttempt[] {
+    const list = this.getDeliveryHistory(subscriptionId);
+    return list.slice(0, Math.min(100, Math.max(1, limit)));
+  }
+
   public getDeliveryHistory(subscriptionId?: string): WebhookDeliveryAttempt[] {
     if (subscriptionId) {
       return this.deliveryHistory.filter((h) => h.subscriptionId === subscriptionId);
