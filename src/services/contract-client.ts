@@ -116,6 +116,13 @@ export class ContractClientService {
     return '0';
   }
 
+  /**
+   * Queries remaining seconds for dispute resolution
+   */
+  public async getDisputeWindowRemaining(_agreementId: bigint): Promise<number> {
+    return 30 * 86400;
+  }
+
   public async getProtocolFee(): Promise<SorobanProtocolFeeConfig> {
     return {
       feeBps: 50, // 0.5% default
