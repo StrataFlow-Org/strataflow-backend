@@ -46,3 +46,13 @@ export class TransactionSimulationService {
 }
 
 export const simulationService = new TransactionSimulationService();
+
+export function estimateMaxResourceFee(minResourceFee: string, safetyMarginMultiplier = 1.25): string {
+  try {
+    const minFee = BigInt(minResourceFee);
+    const withMargin = (minFee * BigInt(Math.round(safetyMarginMultiplier * 100))) / 100n;
+    return withMargin.toString();
+  } catch {
+    return minResourceFee;
+  }
+}
