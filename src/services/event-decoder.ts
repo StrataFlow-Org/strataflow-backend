@@ -108,6 +108,18 @@ export class SorobanEventDecoder {
         data.client = decodedValue;
         break;
 
+      case 'reject':
+        data.milestoneIdx = Number(decodedTopics[2] ?? 0);
+        data.feedbackHash = decodedValue;
+        break;
+
+      case 'mut_can':
+        if (Array.isArray(decodedValue)) {
+          data.client = decodedValue[0];
+          data.refundAmount = decodedValue[1];
+        }
+        break;
+
       case 'fee_paid':
         data.milestoneIdx = decodedTopics[2];
         if (Array.isArray(decodedValue)) {
