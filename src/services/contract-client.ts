@@ -34,9 +34,10 @@ export class ContractClientService {
    */
   public async getVersion(): Promise<string> {
     try {
-      const dummyAccount = new Account('GBBD47IF6LWK7P7MDEVTESTWINNINGTALKER2026COMMITS', '100');
+      const dummyKey = Keypair.random().publicKey();
+      const dummyAccount = new Account(dummyKey, '100');
       const contract = new Contract(this.config.contractId);
-      const op = contract.call('version');
+      const op = contract.call('get_contract_version');
 
       const tx = new TransactionBuilder(dummyAccount, {
         fee: '100',
@@ -48,7 +49,11 @@ export class ContractClientService {
 
       const sim = await this.server.simulateTransaction(tx);
       if (rpc.Api.isSimulationSuccess(sim) && sim.result) {
-        return scValToNative(sim.result.retval) as string;
+        const val = scValToNative(sim.result.retval);
+        if (Array.isArray(val) && val.length === 3) {
+          return `${val[0]}.${val[1]}.${val[2]}`;
+        }
+        return String(val);
       }
       return '1.0.0';
     } catch {
@@ -61,9 +66,10 @@ export class ContractClientService {
    */
   public async isPaused(): Promise<boolean> {
     try {
-      const dummyAccount = new Account('GBBD47IF6LWK7P7MDEVTESTWINNINGTALKER2026COMMITS', '100');
+      const dummyKey = Keypair.random().publicKey();
+      const dummyAccount = new Account(dummyKey, '100');
       const contract = new Contract(this.config.contractId);
-      const op = contract.call('version'); // test connectivity
+      const op = contract.call('is_paused');
 
       const tx = new TransactionBuilder(dummyAccount, {
         fee: '100',
@@ -74,7 +80,10 @@ export class ContractClientService {
         .build();
 
       const sim = await this.server.simulateTransaction(tx);
-      return !rpc.Api.isSimulationSuccess(sim);
+      if (rpc.Api.isSimulationSuccess(sim) && sim.result) {
+        return Boolean(scValToNative(sim.result.retval));
+      }
+      return false;
     } catch {
       return false;
     }

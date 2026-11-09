@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { webhookDispatcher } from '../services/webhook-dispatcher.js';
+import { webhookDispatcher, WebhookDispatcherService } from '../services/webhook-dispatcher.js';
 
 export const webhookRoutes: FastifyPluginAsync = async (fastify) => {
   // POST /api/webhooks/subscribe - register new webhook URL
@@ -14,6 +14,10 @@ export const webhookRoutes: FastifyPluginAsync = async (fastify) => {
     const parsed = schema.safeParse(request.body);
     if (!parsed.success) {
       return reply.status(400).send({ error: parsed.error.issues[0].message });
+    }
+
+    if (!WebhookDispatcherService.isSafeUrl(parsed.data.url)) {
+      return reply.status(400).send({ error: 'Destination webhook URL is invalid or targets a restricted host' });
     }
 
     const subscription = webhookDispatcher.registerSubscription(parsed.data);

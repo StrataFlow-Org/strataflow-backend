@@ -154,41 +154,49 @@ export class SorobanIndexerService {
       const payload = event.data;
 
       switch (event.type) {
+        case 'create':
         case 'AgreementCreated': {
           await this.handleAgreementCreated(onChainId, payload);
           break;
         }
 
+        case 'fund':
         case 'AgreementFunded': {
           await this.handleAgreementFunded(onChainId, payload);
           break;
         }
 
+        case 'submit':
         case 'MilestoneSubmitted': {
           await this.handleMilestoneSubmitted(onChainId, payload);
           break;
         }
 
+        case 'release':
         case 'MilestoneApproved': {
           await this.handleMilestoneApproved(onChainId, payload);
           break;
         }
 
+        case 'dispute':
         case 'DisputeRaised': {
           await this.handleDisputeRaised(onChainId);
           break;
         }
 
+        case 'resolve':
         case 'DisputeResolved': {
           await this.handleDisputeResolved(onChainId);
           break;
         }
 
+        case 'cancel':
         case 'AgreementCancelled': {
           await this.handleAgreementCancelled(onChainId);
           break;
         }
 
+        case 'refund':
         case 'TimeoutRefund': {
           await this.handleTimeoutRefund(onChainId);
           break;
@@ -200,11 +208,11 @@ export class SorobanIndexerService {
   }
 
   private async handleAgreementCreated(onChainId: bigint, payload: any): Promise<void> {
-    const client = payload.client || '';
-    const provider = payload.provider || '';
-    const arbiter = payload.arbiter || '';
-    const token = payload.token || '';
-    const totalAmount = (payload.total_amount ?? payload.amount ?? '0').toString();
+    const client = (payload.client || '').toString();
+    const provider = (payload.provider || '').toString();
+    const arbiter = (payload.arbiter || '').toString();
+    const token = (payload.token || '').toString();
+    const totalAmount = (payload.totalAmount ?? payload.total_amount ?? payload.amount ?? '0').toString();
     const deadline = payload.deadline
       ? new Date(Number(payload.deadline) * 1000)
       : new Date(Date.now() + 86400000 * 30);
@@ -233,13 +241,17 @@ export class SorobanIndexerService {
   }
 
   private async handleAgreementFunded(onChainId: bigint, payload: any): Promise<void> {
-    const fundedAmount = (payload.amount ?? '0').toString();
+    const fundedAmount = (payload.amount ?? payload.totalAmount ?? '0').toString();
     await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.FUNDED, fundedAmount);
   }
 
   private async handleMilestoneSubmitted(onChainId: bigint, payload: any): Promise<void> {
-    const milestoneIndex = typeof payload.milestone_index === 'number' ? payload.milestone_index : 0;
-    const proofHash = payload.proof_hash ? payload.proof_hash.toString() : undefined;
+    const milestoneIndex = typeof payload.milestoneIdx === 'number'
+      ? payload.milestoneIdx
+      : (typeof payload.milestone_index === 'number' ? payload.milestone_index : 0);
+    const proofHash = payload.proofHash
+      ? payload.proofHash.toString()
+      : (payload.proof_hash ? payload.proof_hash.toString() : undefined);
     await agreementRepo.updateMilestoneStatus(
       onChainId,
       milestoneIndex,
@@ -249,15 +261,18 @@ export class SorobanIndexerService {
   }
 
   private async handleMilestoneApproved(onChainId: bigint, payload: any): Promise<void> {
-    const milestoneIndex = typeof payload.milestone_index === 'number' ? payload.milestone_index : 0;
+    const milestoneIndex = typeof payload.milestoneIdx === 'number'
+      ? payload.milestoneIdx
+      : (typeof payload.milestone_index === 'number' ? payload.milestone_index : 0);
     await agreementRepo.updateMilestoneStatus(
       onChainId,
       milestoneIndex,
       MilestoneStatus.APPROVED
     );
 
-    if (payload.remaining_balance !== undefined) {
-      const rem = payload.remaining_balance.toString();
+    const remVal = payload.remainingBalance !== undefined ? payload.remainingBalance : payload.remaining_balance;
+    if (remVal !== undefined) {
+      const rem = remVal.toString();
       const newStatus = rem === '0' ? AgreementStatus.COMPLETED : AgreementStatus.FUNDED;
       await agreementRepo.updateAgreementStatus(onChainId, newStatus, rem);
     }
@@ -276,7 +291,7 @@ export class SorobanIndexerService {
   }
 
   private async handleTimeoutRefund(onChainId: bigint): Promise<void> {
-    await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.RESOLVED, '0');
+    await agreementRepo.updateAgreementStatus(onChainId, AgreementStatus.CANCELLED, '0');
   }
 
   public getEvents(agreementId?: string, type?: string, limit: number = 50): DecodedEvent[] {

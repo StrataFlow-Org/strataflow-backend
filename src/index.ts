@@ -13,11 +13,13 @@ import { indexerService } from './services/soroban-indexer.js';
 import { webhookDispatcher } from './services/webhook-dispatcher.js';
 import { setupBigIntSerialization } from './services/serializer.js';
 import { disconnectDatabase } from './services/db.js';
+import { sep10Service } from './services/sep10-auth.js';
 
 // Setup global BigInt JSON serialization
 setupBigIntSerialization();
 
 const app = Fastify({
+  trustProxy: true,
   bodyLimit: 1048576, // 1MB payload limit to prevent buffer exhaustion DOS
   logger: {
     level: config.NODE_ENV === 'development' ? 'info' : 'warn',
@@ -30,6 +32,17 @@ const app = Fastify({
       'req.body.secret',
     ],
   },
+});
+
+app.addHook('onRequest', async (request) => {
+  const authHeader = request.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    const claims = sep10Service.verifyToken(token);
+    if (claims) {
+      (request as any).user = { address: claims.sub };
+    }
+  }
 });
 
 async function main() {

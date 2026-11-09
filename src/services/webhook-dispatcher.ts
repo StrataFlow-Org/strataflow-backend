@@ -37,12 +37,53 @@ export class WebhookDispatcherService {
     return crypto.timingSafeEqual(expectedBuf, actualBuf);
   }
 
+  public static isSafeUrl(rawUrl: string): boolean {
+    try {
+      const parsed = new URL(rawUrl);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return false;
+      }
+      const host = parsed.hostname.toLowerCase();
+      // Block localhost, loopbacks, link-local, cloud metadata
+      if (
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host === '::1' ||
+        host === '0.0.0.0' ||
+        host === '169.254.169.254' ||
+        host.endsWith('.internal') ||
+        host.endsWith('.local')
+      ) {
+        return false;
+      }
+      // Block private IPv4 ranges
+      const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+      const match = host.match(ipv4Regex);
+      if (match) {
+        const octet1 = parseInt(match[1], 10);
+        const octet2 = parseInt(match[2], 10);
+        if (octet1 === 10) return false;
+        if (octet1 === 127) return false;
+        if (octet1 === 169 && octet2 === 254) return false;
+        if (octet1 === 172 && octet2 >= 16 && octet2 <= 31) return false;
+        if (octet1 === 192 && octet2 === 168) return false;
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   public registerSubscription(params: {
     url: string;
     eventTypes: string[];
     ownerAddress: string;
     secret?: string;
   }): WebhookSubscription {
+    if (!WebhookDispatcherService.isSafeUrl(params.url) && process.env.NODE_ENV === 'production') {
+      throw new Error('Destination webhook URL is invalid or targets a restricted address');
+    }
+
     const id = `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const secret = params.secret || `whsec_${crypto.randomBytes(24).toString('hex')}`;
 

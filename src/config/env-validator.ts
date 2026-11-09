@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { StrKey } from '@stellar/stellar-sdk';
+import { StrKey, Keypair } from '@stellar/stellar-sdk';
 
 export const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -20,7 +20,7 @@ export const EnvSchema = z.object({
     .refine((val) => StrKey.isValidEd25519SecretSeed(val), {
       message: 'SERVER_SECRET_KEY must be a valid Stellar secret seed starting with S',
     })
-    .default('SCBSOLSZRRLUP23G4ZI6IBDRV5MXTLNESTJWH7XDE7SHHB6KOI4VGZED'),
+    .default(() => Keypair.random().secret()),
   JWT_SECRET: z
     .string()
     .min(16, 'JWT_SECRET must be at least 16 characters for cryptographic HMAC strength')

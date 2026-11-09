@@ -21,11 +21,11 @@ describe('Soroban Error Code Translation & Handling Tests', () => {
     }
   });
 
-  it('parses Soroban simulation error pattern "Error(Contract, #12)"', () => {
-    const rawError = 'HostError: Error(Contract, #12) thrown during invocation';
+  it('parses Soroban simulation error pattern "Error(Contract, #10)"', () => {
+    const rawError = 'HostError: Error(Contract, #10) thrown during invocation';
     const parsed = SorobanErrorTranslator.parseError(rawError);
 
-    assert.strictEqual(parsed.code, 12);
+    assert.strictEqual(parsed.code, 10);
     assert.strictEqual(parsed.message, ERROR_CODE_DESCRIPTIONS[SorobanContractErrorCode.DeadlinePassed]);
   });
 

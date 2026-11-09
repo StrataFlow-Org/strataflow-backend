@@ -15,7 +15,7 @@ export interface TokenClaims {
 
 export class Sep10AuthService {
   private serverKeypair: Keypair;
-  private usedChallenges: Set<string> = new Set();
+  private usedChallenges: Map<string, number> = new Map();
 
   constructor() {
     if (config.SERVER_SIGNING_KEY && config.SERVER_SIGNING_KEY.startsWith('S')) {
@@ -71,6 +71,14 @@ export class Sep10AuthService {
       return false;
     }
 
+    const now = Math.floor(Date.now() / 1000);
+    // Periodically evict expired entries to prevent memory exhaustion without resetting active replay protection
+    for (const [chHash, expTime] of this.usedChallenges.entries()) {
+      if (expTime < now) {
+        this.usedChallenges.delete(chHash);
+      }
+    }
+
     const hash = crypto.createHash('sha256').update(signedXdr).digest('hex');
     if (this.usedChallenges.has(hash)) {
       return false;
@@ -88,10 +96,7 @@ export class Sep10AuthService {
 
       const hasClientSignature = signers.includes(clientPublicKey);
       if (hasClientSignature) {
-        this.usedChallenges.add(hash);
-        if (this.usedChallenges.size > 10000) {
-          this.usedChallenges.clear();
-        }
+        this.usedChallenges.set(hash, now + config.CHALLENGE_EXPIRES_IN_SECONDS);
         return true;
       }
       return false;
@@ -145,7 +150,9 @@ export class Sep10AuthService {
 
       const claims: TokenClaims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf-8'));
       const now = Math.floor(Date.now() / 1000);
-      if (claims.exp < now) return null;
+      if (claims.exp < now || (claims.iat && claims.iat > now + 60)) return null;
+      if (claims.iss !== 'strataflow-protocol') return null;
+      if (!claims.sub || !StrKey.isValidEd25519PublicKey(claims.sub)) return null;
 
       return claims;
     } catch {
