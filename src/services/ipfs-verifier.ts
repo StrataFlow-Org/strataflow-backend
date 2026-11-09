@@ -40,3 +40,9 @@ export class IpfsVerifierService {
     };
   }
 }
+
+export function formatGatewayUrl(cidOrUri: string, preferredGateway = 'https://ipfs.io/ipfs/'): string {
+  const result = IpfsVerifierService.verifyCid(cidOrUri);
+  if (!result.isValid) return '';
+  return `${preferredGateway.replace(/\/$/, '')}/${result.cid}`;
+}
