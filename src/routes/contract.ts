@@ -55,6 +55,25 @@ export async function contractRoutes(fastify: FastifyInstance) {
     }
   );
 
+
+  // GET /api/contract/reconciliation/:agreementId - solvency audit
+  fastify.get(
+    '/api/contract/reconciliation/:agreementId',
+    async (req: FastifyRequest<{ Params: { agreementId: string } }>, reply: FastifyReply) => {
+      try {
+        const id = BigInt(req.params.agreementId);
+        const { EscrowReconciliationService } = await import('../services/reconciliation.js');
+        const audit = await EscrowReconciliationService.auditAgreement(id);
+        if (!audit) {
+          return reply.status(404).send({ error: 'Agreement not found for reconciliation' });
+        }
+        return reply.send({ success: true, data: audit });
+      } catch {
+        return reply.status(400).send({ error: 'Invalid agreement ID format' });
+      }
+    }
+  );
+
   // Protocol fee configuration
   fastify.get('/api/contract/fees', async (_req: FastifyRequest, reply: FastifyReply) => {
     const feeConfig = await contractClient.getProtocolFee();
