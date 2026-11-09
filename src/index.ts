@@ -9,6 +9,7 @@ import { agreementRoutes } from './routes/agreements.js';
 import { authRoutes } from './routes/auth.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import { stellarRoutes } from './routes/stellar.js';
+import { ipfsRoutes } from './routes/ipfs.js';
 import { contractRoutes } from './routes/contract.js';
 import { indexerService } from './services/soroban-indexer.js';
 import { webhookDispatcher } from './services/webhook-dispatcher.js';
